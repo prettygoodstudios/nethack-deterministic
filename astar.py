@@ -72,7 +72,7 @@ def findPathInGridWorld(map: list, start: tuple, goal: tuple):
             if (newX, newY) == goal:
                 path = [(newX, newY)]
                 while not current is None:
-                    path.append(current)
+                    path.append(current.getPosition())
                     current = current.getParent()
                 return list(reversed(path))
             if not (newX, newY) in closedSet:
@@ -85,12 +85,62 @@ def findPathInGridWorld(map: list, start: tuple, goal: tuple):
                         heappush(openQueue, openSet[(newX, newY)])
     return None
 
+def renderTestData(data: list, path: set = set()) -> None:
+    """Simply used for debugging"""
+    cannotMove = set((Space.HORIZONTAL_WALL.value, Space.VERTICAL_WALL.value, Space.EMPTYNESS.value))
+    for ri, row in enumerate(data):
+        for vi, value in enumerate(row):
+            if (vi, ri) in path:
+                print('*', end='')
+            elif value in cannotMove:
+                print('x', end='')
+            else:
+                print(' ', end='')
+        print()
+
 if __name__ == "__main__":
-    env = gym.make("NetHackScore-v0")
-    env.reset()
-    env.render()
-    state, reward, _, _ = env.step(MoveActions.UP.value)
-    x, y, *rest = state['blstats']
-    print((x, y))
-    print(findPathInGridWorld(state['glyphs'], (x,y), (x+5, y+5)))
+    #env = gym.make("NetHackScore-v0")
+    #env.reset()
+    #env.render()
+    #state, reward, _, _ = env.step(MoveActions.UP.value)
+    #x, y, *rest = state['blstats']
+    #print((x, y))
+    #print(findPathInGridWorld(state['glyphs'], (x,y), (x+5, y+5)))
+    
+    # Tests for A* 
+    testData1 = [
+        [Space.HORIZONTAL_WALL.value for _ in range(10)],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(4)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.HORIZONTAL_WALL.value for _ in range(10)],
+    ]
+        
+    renderTestData(testData1, set(findPathInGridWorld(testData1, (1, 8), (8, 8))))
+    renderTestData(testData1, set(findPathInGridWorld(testData1, (1, 1), (8, 8))))
+    renderTestData(testData1, set(findPathInGridWorld(testData1, (2, 5), (8, 8))))
+
+    testData2 = [
+        [Space.HORIZONTAL_WALL.value for _ in range(10)],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, Space.VERTICAL_WALL.value] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
+        [Space.HORIZONTAL_WALL.value for _ in range(10)],
+    ]
+
+    renderTestData(testData2, set(findPathInGridWorld(testData2, (1, 8), (8, 8))))
+    renderTestData(testData2, set(findPathInGridWorld(testData2, (1, 1), (8, 8))))
+    renderTestData(testData2, set(findPathInGridWorld(testData2, (2, 5), (8, 8))))
     
