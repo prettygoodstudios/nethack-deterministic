@@ -34,6 +34,15 @@ class Agent:
             return True
         return False
 
+    def getEnviromentDimensions(self):
+        return (len(self.map), len(self.map[0]))
+
+    def getX(self):
+        return self.x_pos 
+    
+    def getY(self):
+        return self.y_pos
+
     def isNotWall(self, y, x, diagonal=False): #Treats boulders as walls
         if(self.map[y][x] == 96):
             return False
