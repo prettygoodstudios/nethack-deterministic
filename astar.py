@@ -111,7 +111,7 @@ def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple):
                 return list(reversed(path))
             if not (newX, newY) in closedSet:
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
-                if inBounds and agent.isNotWall(newY, newX):
+                if inBounds and agent.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY)):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
                     else:
@@ -144,13 +144,13 @@ class MockAgent(PathFindingAgent):
 
     def isDoor(self, y, x) -> bool:
         """There are no doors in mock data yet"""
-        return False 
+        return self.__glyphs[y][x] == Space.OPEN_DOOR.value 
 
     def isNotWall(self, y, x, diagonal=False) -> bool:
-        return not self.__glyphs[y][x] in self.__cannotMove
+        return not self.__glyphs[y][x] in self.__cannotMove and (not diagonal or self.__glyphs[y][x] != Space.OPEN_DOOR.value)
 
     def isWall(self, y, x, diagonal=False) -> bool:
-        return self.__glyphs[y][x] in self.__cannotMove
+        return self.__glyphs[y][x] in self.__cannotMove or (diagonal and self.__glyphs[y][x] == Space.OPEN_DOOR.value)
 
     def getPossibleMoves(self, y, x) -> tuple:
         """A* algo is not using actions only coords"""
@@ -208,7 +208,7 @@ if __name__ == "__main__":
             [Space.VERTICAL_WALL.value] + [0 for _ in range(8)] + [Space.VERTICAL_WALL.value],
             [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
             [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, 0] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
-            [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [0, Space.VERTICAL_WALL.value] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
+            [Space.VERTICAL_WALL.value] + [0 for _ in range(3)] + [Space.VERTICAL_WALL.value] + [Space.OPEN_DOOR.value, Space.VERTICAL_WALL.value] + [Space.VERTICAL_WALL.value] + [0] + [Space.VERTICAL_WALL.value],
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
