@@ -7,6 +7,7 @@ import numpy as np
 from heapq import heapify, heappush, heappop
 from dataclasses import dataclass, field
 from typing import Any
+from utils.graphs import GraphBuilder
 
 
 class Agent:
@@ -16,6 +17,7 @@ class Agent:
     x_pos = None
     y_pos = None
     env = None
+    heatmap_graph = None
 
     def __init__(self, type):
         self.env = gym.make(type)
@@ -25,6 +27,7 @@ class Agent:
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.heatmap_graph = GraphBuilder(["heat_pos"])
 
     def isDoor(self, y, x):
         if(self.map[y][x] == 124 or self.map[y][x] == 45):
@@ -120,3 +123,7 @@ class Agent:
 
     def render(self):
         self.env.render()
+
+    def logPath(self, path):
+        for point in path:
+            self.heatmap_graph.append_point("heat_pos", point)
