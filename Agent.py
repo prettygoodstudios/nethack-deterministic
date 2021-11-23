@@ -47,7 +47,7 @@ class Agent:
         return self.y_pos
 
     def isNotWall(self, y, x, diagonal=False): #Treats boulders as walls
-        if(self.map[y][x] == 96):
+        if(self.map[y][x] == 96 or self.map[y][x] == 32):
             return False
         if(self.map[y][x] == 124 or self.map[y][x] == 45):
             if(self.colors[y][x] == 7): #Checks if not a door
@@ -127,3 +127,4 @@ class Agent:
     def logPath(self, path):
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
+
