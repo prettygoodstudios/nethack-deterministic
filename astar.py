@@ -222,5 +222,8 @@ if __name__ == "__main__":
     else:
         # If test flag not provided run with actual agent
         agent = Agent("NetHackScore-v0")
-        print(findPathInGridWorld(agent, (agent.getX(), agent.getY()), (8, 8)))
+        result = findPathInGridWorld(agent, (agent.getX(), agent.getY()), (8, 8))
+        agent.logPath(result)
+        agent.heatmap_graph.save_graphs()
+        print(result)
         agent.render()
