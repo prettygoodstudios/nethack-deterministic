@@ -1,4 +1,3 @@
-# change it to a list so we can store the path in the vertex
 #based on what do we get to a spicific node
 # which class it should be defined in
 # do you need any output
