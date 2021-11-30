@@ -36,6 +36,11 @@ class Agent:
         if(self.map[y][x] == 43):
             return True
         return False
+    
+    def isInRoom(self, y, x):
+        if(self.map[y][x] == 46):
+            return True
+        return False
 
     def getEnviromentDimensions(self):
         return (len(self.map), len(self.map[0]))
