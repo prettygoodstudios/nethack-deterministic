@@ -8,7 +8,7 @@ from heapq import heapify, heappush, heappop
 from dataclasses import dataclass, field
 from typing import Any
 from utils.graphs import GraphBuilder
-
+from astar import Node
 
 class Agent:
     map = None
@@ -132,4 +132,18 @@ class Agent:
     def logPath(self, path):
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
+    
+    def addDoor(self, y,x):
+        if(self.map[y][x] == 124 or self.map[y][x] == 45):
+            if(self.colors[y][x] == 7): #Checks if not a door
+                return False
+            else: #add door by calling A* 
+                self.map[y][x] = astar.Node((y,x), self.map[y][x], self)
+                
 
+    def startGraph(self):
+        for i in self.map:
+            for j in i:
+                # builf graph from ij
+                self.addDoor(j,i)
+    
