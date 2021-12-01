@@ -79,7 +79,7 @@ class PathFindingAgent(ABC):
         """Gets y position of agent"""
 
 
-def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple):
+def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple, ignoreDoors=True):
     """A* algorithm for nle grid world"""
     actionDirection = {
         MoveActions.UP: (0, -1),
@@ -111,7 +111,8 @@ def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple):
                 return list(reversed(path))
             if not (newX, newY) in closedSet:
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
-                if inBounds and agent.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY)):
+                isNotWall = agent.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY))
+                if inBounds and isNotWall and ( ignoreDoors or not agent.isDoor(newY, newX) ):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
                     else:
