@@ -9,19 +9,24 @@ class GraphEdge():
     def getPath(self):
         print(self.__path)
         return self.__path
-    def getPatCost(self):
+    def getPathCost(self):
         return len(self.__path)
+    def getPaths(self):
+        return self.__path
 
     # def getNode(self, node):
     #     if node in self.__path:
 
 
-""" these are the doors """
-class GraphNode():
-    def __init__(self, __edges):
-        self.__edges = __edges
 
-    def addEdge(self,__edge):
-        self.__edges.append(__edge)
+class GraphNode():
+    """ these are the doors """
+    def __init__(self, edges, x, y):
+        self.edges = edges
+        self.x = x 
+        self.y = y
+
+    def addEdge(self, edge):
+        self.edges.append(edge)
     def getEdges(self):
-        return self.__edges
+        return self.edges
