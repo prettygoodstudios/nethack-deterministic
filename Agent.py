@@ -7,6 +7,8 @@ import numpy as np
 from heapq import heapify, heappush, heappop
 from dataclasses import dataclass, field
 from typing import Any
+from astar import findPathInGridWorld
+from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
 
 
@@ -164,6 +166,7 @@ class Agent:
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.buildGraph()
 
     def render(self):
         self.env.render()
@@ -172,6 +175,27 @@ class Agent:
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
 
+    def buildGraph(self):
+        """Builds initial graph"""
+        doors = [(self.x_pos, self.y_pos)]
+        doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        for y, row in enumerate(self.map):
+            for x, cell in enumerate(row):
+                if self.isDoor(y, x):
+                    doors.append((x, y))
+                    doorLookup[(x,y)] = GraphNode([], x, y)
+        for i1, door1 in enumerate(doors):
+            for i2, door2 in enumerate(doors):
+                if i1 != i2:
+                    path = findPathInGridWorld(self, door1, door2)
+                    doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+        self.graph = doorLookup[(self.x_pos, self.y_pos)]
+
+
+if __name__ == "__main__":
+    agent = Agent("NetHackScore-v0")
+    agent.buildGraph()
+    print(agent.graph)
     def getPath(self, target, cameFrom):
         path = []
         c_node = target
