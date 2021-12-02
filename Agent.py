@@ -66,6 +66,45 @@ class Agent:
     def isWall(self, y, x, diagonal=False):
         return not self.isNotWall(y, x, diagonal)
 
+    def getMoves(self, coords):
+        steps = []
+        y = 0
+        x = 1
+        current = coords[0]
+        for i in range(1, len(coords)):
+            if(coords[i][y]-1 == current[y] and coords[i][x]+1 == current[x]):
+                steps.append([5])
+            elif(coords[i][y]+1 == current[y] and coords[i][x]+1 == current[x]):
+                steps.append([6])
+            elif(coords[i][y]+1 == current[y] and coords[i][x]-1 == current[x]):
+                steps.append([7])
+            elif(coords[i][y]-1 == current[y] and coords[i][x]-1 == current[x]):
+                steps.append([8])
+            elif(coords[i][y]-1 == current[y]):
+                if(self.map[coords[i][y]-1][coords[i][x]] == 43): #Locked door, need to kick
+                    steps.append([20, 1, 1])
+                else:
+                    steps.append([1])
+            elif(coords[i][x]+1 == current[x]):
+                if(self.map[coords[i][y]][coords[i][x]+1] == 43): #Locked door, need to kick
+                    steps.append([20, 2, 2])
+                else:
+                    steps.append([2])
+            elif(coords[i][y]+1 == current[y]):
+                if(self.map[coords[i][y]+1][coords[i][x]] == 43): #Locked door, need to kick
+                    steps.append([20, 3, 3])
+                else:
+                    steps.append([3])
+            elif(coords[i][x]-1 == current[x]):
+                if(self.map[coords[i][y]][coords[i][x]-1] == 43): #Locked door, need to kick
+                    steps.append([20, 4, 4])
+                else:
+                    steps.append([4])
+            else:
+                return None
+            current = coords[i]
+        return steps
+
     def getPossibleMoves(self, y, x):
         possibleSteps = []
         coords = []
@@ -157,3 +196,43 @@ if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
     agent.buildGraph()
     print(agent.graph)
+    def getPath(self, target, cameFrom):
+        path = []
+        c_node = target
+        while True:
+            if(cameFrom[c_node][0] == None):
+                return path
+            path = path + cameFrom[c_node][1]
+            c_node = cameFrom[c_node][0]
+
+
+    def generalGraphAStar(self, start, target, heuristic):
+        queue = []
+        queue = heapify(queue)
+        queue.heappush((0, start))
+
+        cameFrom = {start: (None, None)}
+        costs = {start: 0}
+
+        while(len(queue) > 0):
+            currentNode = queue.heappop()
+            if(currentNode == target):
+                return self.getPath(start, cameFrom)
+            for path in currentNode.getEdges:
+                possibleCost = costs[currentNode] + path.getPathCost()
+                if(path.__to != currentNode):
+                    to = path.__to
+                    pth = to.getPath()
+                else:
+                    to = path.__from
+                    pth = reversed(to.getPath())
+                try:
+                    if(possibleCost < costs[to]):
+                        costs[to] = possibleCost
+                        queue.heappush((possibleCost + heuristic(to, target), to))
+                        cameFrom[to] = (currentNode, pth)
+                except:
+                    costs[to] = possibleCost
+                    queue.heappush((possibleCost + heuristic(to, target), to))
+                    cameFrom[to] = (currentNode, pth)
+        return None
