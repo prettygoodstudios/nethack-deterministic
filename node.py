@@ -9,7 +9,6 @@ class GraphEdge():
         self.__to = __to
         self.__path = __path
     def getPath(self):
-        print(self.__path)
         return self.__path
     def getPathCost(self):
         return len(self.__path)
