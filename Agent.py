@@ -235,5 +235,6 @@ if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
     agent.buildGraph()
     print(agent.graph)
+    agent.graph.plot()
     
 

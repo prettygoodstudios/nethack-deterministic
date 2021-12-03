@@ -1,3 +1,5 @@
+from matplotlib import pyplot as plt
+
 #based on what do we get to a spicific node
 # which class it should be defined in
 # do you need any output
@@ -44,8 +46,28 @@ class GraphNode():
                 return ""
             output = ""
             for edge in nonTraversedEdges:
-                traversedEdges.add(str(edge))
-                output += f"({node.x},{node.y}) - {edge.getPathCost()} -> ({edge.getTo().x},{edge.getTo().y})\n" 
-                output += traverse(edge.getTo())
+                if not str(edge) in traversedEdges:
+                    traversedEdges.add(str(edge))
+                    output += f"({node.x},{node.y}) - {edge.getPathCost()} -> ({edge.getTo().x},{edge.getTo().y})\n" 
+                    output += traverse(edge.getTo())
             return output 
         return traverse(self)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def plot(self) -> str:
+        """Plots graph using matplotlib"""
+        traversedEdges = set()
+        def traverse(node: GraphNode):
+            nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
+            plt.scatter([node.x], [node.y],)
+            plt.annotate(f"({node.x},{node.y})", (node.x, node.y))
+            if len(nonTraversedEdges) == 0:
+                return
+            for edge in nonTraversedEdges:
+                traversedEdges.add(str(edge))
+                plt.plot([node.x, edge.getTo().x], [node.y, edge.getTo().y])
+                traverse(edge.getTo())
+        traverse(self)
+        plt.show()
