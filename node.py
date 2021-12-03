@@ -59,6 +59,8 @@ class GraphNode():
     def plot(self) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
+        plt.yticks(range(0, 21))
+        plt.xticks(range(0, 81))
         def traverse(node: GraphNode):
             nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
             plt.scatter([node.x], [node.y],)
@@ -67,7 +69,11 @@ class GraphNode():
                 return
             for edge in nonTraversedEdges:
                 traversedEdges.add(str(edge))
-                plt.plot([node.x, edge.getTo().x], [node.y, edge.getTo().y])
+                xPts = [x for x,y in edge.getPath()]
+                yPts = [y for x,y in edge.getPath()]
+                s = [10 for _ in edge.getPath()]
+                plt.scatter(xPts, yPts, s)
+                plt.plot(xPts, yPts)
                 traverse(edge.getTo())
         traverse(self)
         plt.show()
