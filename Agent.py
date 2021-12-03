@@ -187,8 +187,9 @@ class Agent:
         for i1, door1 in enumerate(doors):
             for i2, door2 in enumerate(doors):
                 if i1 != i2:
-                    path = findPathInGridWorld(self, door1, door2)
-                    doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+                    path = findPathInGridWorld(self, door1, door2, ignoreDoors=False)
+                    if not path is None:
+                        doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
 def generalGraphAStar(self, start, target, heuristic):
