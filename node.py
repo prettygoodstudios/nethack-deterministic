@@ -13,6 +13,10 @@ class GraphEdge():
         return len(self.__path)
     def getPaths(self):
         return self.__path
+    def __str__(self) -> str:
+        return f"({self.__from.x},{self.__from.y})->({self.__to.x},{self.__to.y})"
+    def getTo(self):
+        return self.__to
 
     # def getNode(self, node):
     #     if node in self.__path:
@@ -30,3 +34,18 @@ class GraphNode():
         self.edges.append(edge)
     def getEdges(self):
         return self.edges
+
+    def __str__(self) -> str:
+        """Traverses graph generating representation"""
+        traversedEdges = set()
+        def traverse(node: GraphNode):
+            nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
+            if len(nonTraversedEdges) == 0:
+                return ""
+            output = ""
+            for edge in nonTraversedEdges:
+                traversedEdges.add(str(edge))
+                output += f"({node.x},{node.y}) - {edge.getPathCost()} -> ({edge.getTo().x},{edge.getTo().y})\n" 
+                output += traverse(edge.getTo())
+            return output 
+        return traverse(self)

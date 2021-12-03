@@ -191,48 +191,49 @@ class Agent:
                     doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
+def generalGraphAStar(self, start, target, heuristic):
+    queue = []
+    queue = heapify(queue)
+    queue.heappush((0, start))
+
+    cameFrom = {start: (None, None)}
+    costs = {start: 0}
+
+    while(len(queue) > 0):
+        currentNode = queue.heappop()
+        if(currentNode == target):
+            return self.getPath(start, cameFrom)
+        for path in currentNode.getEdges:
+            possibleCost = costs[currentNode] + path.getPathCost()
+            if(path.__to != currentNode):
+                to = path.__to
+                pth = to.getPath()
+            else:
+                to = path.__from
+                pth = reversed(to.getPath())
+            try:
+                if(possibleCost < costs[to]):
+                    costs[to] = possibleCost
+                    queue.heappush((possibleCost + heuristic(to, target), to))
+                    cameFrom[to] = (currentNode, pth)
+            except:
+                costs[to] = possibleCost
+                queue.heappush((possibleCost + heuristic(to, target), to))
+                cameFrom[to] = (currentNode, pth)
+    return None
+
+def getPath(self, target, cameFrom):
+    path = []
+    c_node = target
+    while True:
+        if(cameFrom[c_node][0] == None):
+            return path
+        path = path + cameFrom[c_node][1]
+        c_node = cameFrom[c_node][0]
 
 if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
     agent.buildGraph()
     print(agent.graph)
-    def getPath(self, target, cameFrom):
-        path = []
-        c_node = target
-        while True:
-            if(cameFrom[c_node][0] == None):
-                return path
-            path = path + cameFrom[c_node][1]
-            c_node = cameFrom[c_node][0]
+    
 
-
-    def generalGraphAStar(self, start, target, heuristic):
-        queue = []
-        queue = heapify(queue)
-        queue.heappush((0, start))
-
-        cameFrom = {start: (None, None)}
-        costs = {start: 0}
-
-        while(len(queue) > 0):
-            currentNode = queue.heappop()
-            if(currentNode == target):
-                return self.getPath(start, cameFrom)
-            for path in currentNode.getEdges:
-                possibleCost = costs[currentNode] + path.getPathCost()
-                if(path.__to != currentNode):
-                    to = path.__to
-                    pth = to.getPath()
-                else:
-                    to = path.__from
-                    pth = reversed(to.getPath())
-                try:
-                    if(possibleCost < costs[to]):
-                        costs[to] = possibleCost
-                        queue.heappush((possibleCost + heuristic(to, target), to))
-                        cameFrom[to] = (currentNode, pth)
-                except:
-                    costs[to] = possibleCost
-                    queue.heappush((possibleCost + heuristic(to, target), to))
-                    cameFrom[to] = (currentNode, pth)
-        return None
