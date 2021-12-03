@@ -1,9 +1,8 @@
 
 from abc import ABC, abstractmethod
 from heapq import heappop, heappush
+from Map import Map
 from main import MoveActions, Space
-
-
 
 
 class Node:
@@ -43,7 +42,7 @@ class Node:
     def __repr__(self) -> str:
         return str(self.__position)
 
-class PathFindingAgent(ABC):
+class PathFindingMap(ABC):
     """Abstract class for agents A* is compatible with"""
 
     @abstractmethod
@@ -66,16 +65,8 @@ class PathFindingAgent(ABC):
     def getEnviromentDimensions(self) -> tuple:
         """Returns dimensions of enviroment"""
 
-    @abstractmethod
-    def getX(self) -> int:
-        """Gets x position of agent"""
 
-    @abstractmethod 
-    def getY(self) -> int:
-        """Gets y position of agent"""
-
-
-def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple, ignoreDoors=True):
+def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
     """A* algorithm for nle grid world"""
     actionDirection = {
         MoveActions.UP: (0, -1),
@@ -90,7 +81,7 @@ def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple, igno
     openSet = {start: Node(start, 0, None)}
     openQueue = [openSet[k] for k in openSet]
     closedSet = {}
-    height, width = agent.getEnviromentDimensions()
+    height, width = map.getEnviromentDimensions()
     while len(openSet) > 0:
         current = heappop(openQueue)
         openSet.pop(current.getPosition())
@@ -107,8 +98,8 @@ def findPathInGridWorld(agent: PathFindingAgent, start: tuple, goal: tuple, igno
                 return list(reversed(path))
             if not (newX, newY) in closedSet:
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
-                isNotWall = agent.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY))
-                if inBounds and isNotWall and ( ignoreDoors or not agent.isDoor(newY, newX) ):
+                isNotWall = map.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY))
+                if inBounds and isNotWall and ( ignoreDoors or not map.isDoor(newY, newX) ):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
                     else:
@@ -131,7 +122,7 @@ def renderTestData(data: list, path: set = set()) -> None:
 
 
 
-class MockAgent(PathFindingAgent):
+class MockMap(PathFindingMap):
     """Mocks the agent for testing purposes"""
     __cannotMove = set((Space.HORIZONTAL_WALL.value, Space.VERTICAL_WALL.value, Space.EMPTYNESS.value))
     __glyphs: list = None
@@ -161,8 +152,3 @@ class MockAgent(PathFindingAgent):
     def getEnviromentDimensions(self) -> tuple:
         return (len(self.__glyphs), len(self.__glyphs[0]))
 
-    def getY(self) -> int:
-        return 0
-
-    def getX(self) -> int:
-        return 0
