@@ -80,14 +80,14 @@ class GraphNode():
         # Traverse and draw the nodes and edges
         def traverse(node: GraphNode):
             nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
-            plt.scatter([node.x], [node.y],)
+            plt.scatter([node.x + 0.5], [node.y + 0.5])
             plt.annotate(f"({node.x},{node.y})", (node.x, node.y))
             if len(nonTraversedEdges) == 0:
                 return
             for edge in nonTraversedEdges:
                 traversedEdges.add(str(edge))
-                xPts = [x for x,y in edge.getPath()]
-                yPts = [y for x,y in edge.getPath()]
+                xPts = [x + 0.5 for x,y in edge.getPath()]
+                yPts = [y + 0.5 for x,y in edge.getPath()]
                 s = [10 for _ in edge.getPath()]
                 plt.scatter(xPts, yPts, s)
                 plt.plot(xPts, yPts)

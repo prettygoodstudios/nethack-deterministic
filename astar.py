@@ -86,15 +86,17 @@ def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
         # Ensure in bounds
         for action in MoveActions:
             newX, newY = actionDirection[action][0] + currX, actionDirection[action][1] + currY
-            if (newX, newY) == goal:
-                path = [(newX, newY)]
-                while not current is None:
-                    path.append(current.getPosition())
-                    current = current.getParent()
-                return list(reversed(path))
-            if not (newX, newY) in closedSet:
+            diagonal = (newX != currX and newY != currY)
+            # Check if legal move
+            if not (newX, newY) in closedSet and not (map.isDoor(currY, currX) and diagonal) and not (map.isDoor(newY, newX) and diagonal):
+                if (newX, newY) == goal:
+                    path = [(newX, newY)]
+                    while not current is None:
+                        path.append(current.getPosition())
+                        current = current.getParent()
+                    return list(reversed(path))
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
-                isNotWall = map.isNotWall(newY, newX, diagonal=(newX != currX and newY != currY))
+                isNotWall = map.isNotWall(newY, newX)
                 if inBounds and isNotWall and ( ignoreDoors or not map.isDoor(newY, newX) ):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
