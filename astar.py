@@ -56,10 +56,6 @@ class PathFindingMap(ABC):
     @abstractmethod
     def isWall(self, y, x, diagonal=False) -> bool:
         """Returns true if cell is wall"""
-    
-    @abstractmethod
-    def getPossibleMoves(self, y, x) -> tuple:
-        """Returns possible moves first element action number, second element coordinate"""
 
     @abstractmethod
     def getEnviromentDimensions(self) -> tuple:

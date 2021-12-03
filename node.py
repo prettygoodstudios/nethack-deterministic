@@ -1,4 +1,7 @@
 from matplotlib import pyplot as plt
+from matplotlib import patches
+
+from astar import PathFindingMap
 
 #based on what do we get to a spicific node
 # which class it should be defined in
@@ -55,11 +58,26 @@ class GraphNode():
     def __repr__(self) -> str:
         return str(self)
 
-    def plot(self) -> str:
+    def plot(self, map: PathFindingMap) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
-        plt.yticks(range(0, 21))
-        plt.xticks(range(0, 81))
+        yVals = range(0, map.getEnviromentDimensions()[0])
+        xVals = range(0, map.getEnviromentDimensions()[1])
+        plt.yticks(yVals)
+        plt.xticks(xVals[::5])
+
+        # Draw the walls
+        axes = plt.axes()
+        for y in yVals:
+            for x in xVals:
+                if map.isWall(y,x):
+                    rect = patches.Rectangle((x,y), 1,1)
+                    axes.add_patch(rect)
+                if map.isDoor(y,x):
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    axes.add_patch(rect)
+
+        # Traverse and draw the nodes and edges
         def traverse(node: GraphNode):
             nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
             plt.scatter([node.x], [node.y],)
