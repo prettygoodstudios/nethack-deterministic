@@ -163,38 +163,38 @@ class Agent:
         # queue = heapify(queue)
         heappush(queue, (0, start))
 
-        cameFrom = {str(start.y)+str(start.x): (None, None)}
-        costs = {str(start.y)+str(start.x): 0}
+        cameFrom = {str(start.y)+","+str(start.x): (None, None)}
+        costs = {str(start.y)+","+str(start.x): 0}
 
         while(len(queue) > 0):
             currentNode = heappop(queue)[1]
             if(currentNode == target):
-                return self.getPath(start, cameFrom)
+                return self.getPath(start, target, cameFrom)
             for path in currentNode.getEdges():
-                possibleCost = costs[str(currentNode.y)+str(currentNode.x)] + path.getPathCost()
+                possibleCost = costs[str(currentNode.y)+","+str(currentNode.x)] + path.getPathCost()
                 to = path.getTo()
                 pth = path.getPath()
                 try:
-                    if(possibleCost < costs[str(to.y)+str(to.x)]):
-                        costs[str(to.y)+str(to.x)] = possibleCost
+                    if(possibleCost < costs[str(to.y)+","+str(to.x)]):
+                        costs[str(to.y)+","+str(to.x)] = possibleCost
                         heappush(queue, (possibleCost + path.getPathCost(), to))
                         # queue.heappush((possibleCost + heuristic(to, target), to))
-                        cameFrom[str(to.y)+str(to.x)] = (currentNode, pth)
+                        cameFrom[str(to.y)+","+str(to.x)] = (currentNode, pth)
                 except:
-                    costs[str(to.y)+str(to.x)] = possibleCost
+                    costs[str(to.y)+","+str(to.x)] = possibleCost
                     heappush(queue, (possibleCost + path.getPathCost(), to))
                     # queue.heappush((possibleCost + heuristic(to, target), to))
-                    cameFrom[str(to.y)+str(to.x)] = (currentNode, pth)
+                    cameFrom[str(to.y)+","+str(to.x)] = (currentNode, pth)
         return None
 
-    def getPath(self, target, cameFrom):
+    def getPath(self, start, target, cameFrom):
         path = []
         c_node = target
         while True:
-            if(cameFrom[c_node][0] == None):
+            if(cameFrom[str(c_node.y)+","+str(c_node.x)][0] == None):
                 return path
-            path = path + cameFrom[c_node][1]
-            c_node = cameFrom[c_node][0]
+            path = path + cameFrom[str(c_node.y)+","+str(c_node.x)][1]
+            c_node = cameFrom[str(c_node.y)+","+str(c_node.x)][0]
 
     def logPath(self, path):
         for point in path:

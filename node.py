@@ -58,6 +58,9 @@ class GraphNode():
     def __repr__(self) -> str:
         return str(self)
 
+    def __lt__(self, other):
+        return True
+
     def plot(self, map: PathFindingMap) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
