@@ -96,7 +96,7 @@ def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
                         current = current.getParent()
                     return list(reversed(path))
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
-                isNotWall = map.isNotWall(newY, newX)
+                isNotWall = map.isNotWall(newY, newX, diagonal=diagonal)
                 if inBounds and isNotWall and ( ignoreDoors or not map.isDoor(newY, newX) ):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)

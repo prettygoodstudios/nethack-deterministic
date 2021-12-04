@@ -10,10 +10,14 @@ if __name__ == "__main__":
         agent.graph.plot(agent.map)
         print(moves)
         for move in moves:
-            for m in move:
-                agent.step(m)
+            startX, startY = agent.getX(), agent.getY()
+            while True:
+                for m in move:
+                    agent.step(m)
+                if (startX, startY) != (agent.getX(), agent.getY()):
+                    break
         agent.render()
         agent.buildGraph()
-        agent.buildGraph()
-        agent.graph.plot(agent.map)
+        agent.graph.plot(agent.map) 
+        
     

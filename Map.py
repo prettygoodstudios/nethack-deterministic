@@ -6,6 +6,7 @@ class Map:
     colors = None
     env = None
     obs = None
+    doors = set()
 
     def __init__(self, env, obs):
         self.env = env
@@ -14,6 +15,8 @@ class Map:
         self.map = obs['chars']
 
     def isDoor(self, y, x):
+        if (y,x) in self.doors:
+            return True
         if(self.map[y][x] == 124 or self.map[y][x] == 45):
             if(self.colors[y][x] != 7): #Checks if not a door
                 return True
@@ -50,6 +53,7 @@ class Map:
 
     def update(self, obs):
         self.obs = obs
+        self.__updateDoors()
 
     def findStairs(self):
         y_bound, x_bound = self.map.shape
@@ -58,6 +62,12 @@ class Map:
                 if(self.map[y][x] == 62):
                     return (y, x)
         return None
+
+    def __updateDoors(self):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
+                if self.isDoor(y,x):
+                    self.doors.add((y,x))
 
 
 
