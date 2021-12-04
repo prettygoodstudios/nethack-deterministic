@@ -14,5 +14,6 @@ if __name__ == "__main__":
                 agent.step(m)
         agent.render()
         agent.buildGraph()
+        agent.buildGraph()
         agent.graph.plot(agent.map)
     
