@@ -201,6 +201,20 @@ class Agent:
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
 
+    def findMeanVisitedPosition(self):
+        """Finds the mean visited position using floor as a proxy"""
+        height, width = self.map.getEnviromentDimensions()
+        sumX = 0
+        sumY = 0
+        count = 0
+        for row in range(height):
+            for col in range(width):
+                if self.map.isNotWall(row, col):
+                    count += 1
+                    sumX += col 
+                    sumY += row 
+        return (sumX/count, sumY/count)
+
 if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
     agent.buildGraph()
