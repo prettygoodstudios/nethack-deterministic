@@ -6,4 +6,5 @@ locked door = 43
 floor = 46
 player = 64
 boulder = 96
-Stairs 62
+Stairs = 62
+hallway = 35

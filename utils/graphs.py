@@ -41,6 +41,9 @@ class GraphBuilder:
         all_pts = self._pos_between(end_pt=pt, start_pt=start)
         for i in all_pts:
             self.graphs_data[graph_type].append(i)
+    
+    def getVisitedSet(self, graph_type):
+        return set(self.graphs_data[graph_type])
 
     def _pos_between(self, end_pt, start_pt):
         """

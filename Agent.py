@@ -215,6 +215,10 @@ class Agent:
                     sumY += row 
         return (sumX/count, sumY/count)
 
+    def getPriorityQueue(self):
+        # call the equivalant method in the map class but providing it with the visited set from the heat map and the current s and y
+        return self.map.getPriorityQueue(self, self.heatmap_graph.getVisitedSet("heat_pos"))
+
 if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
     agent.buildGraph()

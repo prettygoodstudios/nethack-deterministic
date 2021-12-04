@@ -1,6 +1,6 @@
 from utils.graphs import GraphBuilder
-
-
+import heapq
+from astar import Node
 class Map:
     map = None
     colors = None
@@ -60,6 +60,18 @@ class Map:
                     return (y, x)
         return None
 
+    def getPriorityQueue(self, agent, visited):
+        possibleMoves = []
+        y_bound, x_bound = self.map.shape
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if (x,y) not in visited: # if it has not been visited
+                    # if it is a door or not a standard floor and not empty. if it is something else it will move there. 
+                    # could cause problem if we can't defeat an enemy or there is unintended consequenses
+
+                    if  self.isDoor(y, x) or (self.map[y][x] != 46 and self.map[y][x] != 32): 
+                        heapq.heappush(possibleMoves, (heuristic(agent, Node((y,x), None, None)) ,(y, x)))
+        return possibleMoves
 
 
-    
+
