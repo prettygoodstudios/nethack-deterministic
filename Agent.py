@@ -132,7 +132,7 @@ class Agent:
     def step(self, action):
         obs = self.env.step(action)
         self.map.update(obs)
-        blstats = [_ for _ in obs["blstats"]]
+        blstats = obs["blstats"]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.buildGraph()

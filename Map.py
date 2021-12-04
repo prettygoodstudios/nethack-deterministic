@@ -44,7 +44,6 @@ class Map:
 
     def update(self, obs):
         self.obs = obs
-        self.buildGraph()
 
 
     
