@@ -1,8 +1,8 @@
 import sys
 sys.path.append("..")
 from Agent import Agent
-from astar import MockAgent, findPathInGridWorld, renderTestData
-from main import MoveActions, Space
+from astar import MockMap, findPathInGridWorld, renderTestData
+from main import Space
 from sys import argv
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
             [Space.HORIZONTAL_WALL.value for _ in range(10)],
         ]
-        mockOne = MockAgent(testData1)   
+        mockOne = MockMap(testData1)   
         renderTestData(testData1, set(findPathInGridWorld(mockOne, (1, 8), (8, 8))))
         renderTestData(testData1, set(findPathInGridWorld(mockOne, (1, 1), (8, 8))))
         renderTestData(testData1, set(findPathInGridWorld(mockOne, (2, 5), (8, 8))))
@@ -49,7 +49,7 @@ if __name__ == "__main__":
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
             [Space.HORIZONTAL_WALL.value for _ in range(10)],
         ]
-        mockTwo = MockAgent(testData2)  
+        mockTwo = MockMap(testData2)  
 
         renderTestData(testData2, set(findPathInGridWorld(mockTwo, (1, 8), (8, 8))))
         renderTestData(testData2, set(findPathInGridWorld(mockTwo, (1, 1), (8, 8))))
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     else:
         # If test flag not provided run with actual agent
         agent = Agent("NetHackScore-v0")
-        result = findPathInGridWorld(agent, (agent.getX(), agent.getY()), (8, 8))
+        result = findPathInGridWorld(agent.map, (agent.getX(), agent.getY()), (8, 8))
         agent.logPath(result)
         agent.heatmap_graph.save_graphs()
         print(result)
