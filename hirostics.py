@@ -6,7 +6,7 @@ import math
 def queueBased(self, Agent a, node n):
     self.cost = 0
     sum = Agent.findmeanVistiedPostion()
-    pNode = [n.x, ny]
+    pNode = [n.x, n.y]
     pAgent = [sum.x_pos, sum.y_pos]
     self.distance = math.sqrt( ((pNode[0]-pAgent[0])**2)+((pNode[1]-pAgent[1])**2) )
     if self.cost < self.distance:
