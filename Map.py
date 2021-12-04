@@ -19,6 +19,12 @@ class Map:
                 return True
         if(self.map[y][x] == 43):
             return True
+        if(y > 0 and y < self.getEnviromentDimensions()[0]-1):
+            if((self.map[y-1][x] == 124 or self.map[y-1][x] == 45) and (self.map[y+1][x] == 124 or self.map[y+1][x] == 45) and (self.map[y][x] == 46 or self.map[y][x] == 32)):
+                return True
+        if(x > 0 and x < self.getEnviromentDimensions()[1]-1):
+            if((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and (self.map[y][x] == 46 or self.map[y][x] == 32)):
+                return True
         return False
     
     def isInRoom(self, y, x):
