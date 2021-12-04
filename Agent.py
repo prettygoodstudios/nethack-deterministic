@@ -44,11 +44,11 @@ class Agent:
         for i in range(1, len(coords)):
             if(coords[i][y] == current[y]-1 and coords[i][x] == current[x]+1 and current[x] < 78 and current[y] > 0):
                 steps.append([5])
-            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]+1 and current[x] < 78 and current[u] < 20):
+            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]+1 and current[x] < 78 and current[y] < 20):
                 steps.append([6])
-            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[u] < 20):
+            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[y] < 20):
                 steps.append([7])
-            elif(coords[i][y] == current[y]-1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[u] > 0):
+            elif(coords[i][y] == current[y]-1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[y] > 0):
                 steps.append([8])
             elif(coords[i][y] == current[y]-1 and current[y] > 0):
                 if(self.map.isDoor(coords[i][y]-1, coords[i][x])): #Locked door, need to kick
@@ -65,7 +65,7 @@ class Agent:
                     steps.append([20, 3, 3])
                 else:
                     steps.append([3])
-            elif(coords[i][x] == current[x]-1) and curent[x] > 0:
+            elif(coords[i][x] == current[x]-1) and current[x] > 0:
                 if(self.map.isDoor(coords[i][y], coords[i][x]-1)): #Locked door, need to kick
                     steps.append([20, 4, 4])
                 else:
