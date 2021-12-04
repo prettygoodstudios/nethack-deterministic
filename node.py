@@ -63,8 +63,8 @@ class GraphNode():
         traversedEdges = set()
         yVals = range(0, map.getEnviromentDimensions()[0])
         xVals = range(0, map.getEnviromentDimensions()[1])
-        plt.yticks(yVals)
-        plt.xticks(xVals[::5])
+        #plt.yticks(yVals)
+        #plt.xticks(xVals[::5])
 
         # Draw the walls
         axes = plt.axes()
@@ -86,11 +86,12 @@ class GraphNode():
                 return
             for edge in nonTraversedEdges:
                 traversedEdges.add(str(edge))
-                xPts = [x + 0.5 for x,y in edge.getPath()]
-                yPts = [y + 0.5 for x,y in edge.getPath()]
+                xPts = [x + 0.5 for y,x in edge.getPath()]
+                yPts = [y + 0.5 for y,x in edge.getPath()]
                 s = [10 for _ in edge.getPath()]
                 plt.scatter(xPts, yPts, s)
                 plt.plot(xPts, yPts)
                 traverse(edge.getTo())
         traverse(self)
+        plt.axis('scaled')
         plt.show()
