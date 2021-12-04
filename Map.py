@@ -50,7 +50,6 @@ class Map:
 
     def update(self, obs):
         self.obs = obs
-        self.buildGraph()
 
     def findStairs(self):
         y_bound, x_bound = self.map.shape

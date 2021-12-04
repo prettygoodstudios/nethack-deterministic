@@ -90,9 +90,9 @@ def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
             # Check if legal move
             if not (newX, newY) in closedSet and not (map.isDoor(currY, currX) and diagonal) and not (map.isDoor(newY, newX) and diagonal):
                 if (newX, newY) == goal:
-                    path = [(newX, newY)]
+                    path = [(newY, newX)]
                     while not current is None:
-                        path.append(current.getPosition())
+                        path.append(tuple(reversed(current.getPosition())))
                         current = current.getParent()
                     return list(reversed(path))
                 inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
@@ -110,7 +110,7 @@ def renderTestData(data: list, path: set = set()) -> None:
     cannotMove = set((Space.HORIZONTAL_WALL.value, Space.VERTICAL_WALL.value, Space.EMPTYNESS.value))
     for ri, row in enumerate(data):
         for vi, value in enumerate(row):
-            if (vi, ri) in path:
+            if (ri, vi) in path:
                 print('*', end='')
             elif value in cannotMove:
                 print('x', end='')

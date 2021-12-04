@@ -130,7 +130,7 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        obs = self.env.step(action)
+        obs, *rest = self.env.step(action)
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
