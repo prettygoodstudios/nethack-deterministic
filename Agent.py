@@ -1,3 +1,4 @@
+# from _typeshed import _T_co
 import gym
 from gym.spaces.box import Box
 import nle
@@ -159,33 +160,31 @@ class Agent:
 
     def generalGraphAStar(self, start, target, heuristic):
         queue = []
-        queue = heapify(queue)
-        queue.heappush((0, start))
+        # queue = heapify(queue)
+        heappush(queue, (0, start))
 
-        cameFrom = {start: (None, None)}
-        costs = {start: 0}
+        cameFrom = {str(start.y)+str(start.x): (None, None)}
+        costs = {str(start.y)+str(start.x): 0}
 
         while(len(queue) > 0):
-            currentNode = queue.heappop()
+            currentNode = heappop(queue)[1]
             if(currentNode == target):
                 return self.getPath(start, cameFrom)
-            for path in currentNode.getEdges:
-                possibleCost = costs[currentNode] + path.getPathCost()
-                if(path.__to != currentNode):
-                    to = path.__to
-                    pth = to.getPath()
-                else:
-                    to = path.__from
-                    pth = reversed(to.getPath())
+            for path in currentNode.getEdges():
+                possibleCost = costs[str(currentNode.y)+str(currentNode.x)] + path.getPathCost()
+                to = path.getTo()
+                pth = path.getPath()
                 try:
-                    if(possibleCost < costs[to]):
-                        costs[to] = possibleCost
-                        queue.heappush((possibleCost + heuristic(to, target), to))
-                        cameFrom[to] = (currentNode, pth)
+                    if(possibleCost < costs[str(to.y)+str(to.x)]):
+                        costs[str(to.y)+str(to.x)] = possibleCost
+                        heappush(queue, (possibleCost + path.getPathCost(), to))
+                        # queue.heappush((possibleCost + heuristic(to, target), to))
+                        cameFrom[str(to.y)+str(to.x)] = (currentNode, pth)
                 except:
-                    costs[to] = possibleCost
-                    queue.heappush((possibleCost + heuristic(to, target), to))
-                    cameFrom[to] = (currentNode, pth)
+                    costs[str(to.y)+str(to.x)] = possibleCost
+                    heappush(queue, (possibleCost + path.getPathCost(), to))
+                    # queue.heappush((possibleCost + heuristic(to, target), to))
+                    cameFrom[str(to.y)+str(to.x)] = (currentNode, pth)
         return None
 
     def getPath(self, target, cameFrom):
