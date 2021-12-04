@@ -52,5 +52,14 @@ class Map:
         self.obs = obs
         self.buildGraph()
 
+    def findStairs(self):
+        y_bound, x_bound = self.map.shape
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if(self.map[y][x] == 62):
+                    return (y, x)
+        return None
+
+
 
     
