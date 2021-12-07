@@ -17,7 +17,7 @@ class Map:
     def isNewRoute(self, a, y, x):
         y_bound = self.getEnviromentDimensions()[0]-1
         x_bound = self.getEnviromentDimensions()[1]-1
-        if (y, x) not in a.visited or self.isWall(y,x):
+        if (y, x) in a.visited or self.isWall(y,x):
             return False
         isNew = False
         if y > 0:
