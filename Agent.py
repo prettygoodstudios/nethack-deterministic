@@ -36,6 +36,7 @@ class Agent:
     def play(self):
         while True:
             _, destination = heappop(self.pQueue)
+            print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
             path = self.generalGraphAStar(self.graph, destination, None)
             print(f"General Path {path}")
             moves = self.getMoves(path)
@@ -176,7 +177,7 @@ class Agent:
         prioQue = []
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
-                if self.map.isDoor(y, x):
+                if self.map.isDoor(y, x) and (self.y_pos, self.x_pos) != (y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
                     heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
@@ -187,8 +188,6 @@ class Agent:
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
         self.pQueue = prioQue
-        b = heappop(prioQue)
-        c = heappop(prioQue)
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
