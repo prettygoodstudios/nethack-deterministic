@@ -40,11 +40,11 @@ class Agent:
             path = self.generalGraphAStar(self.graph, destination, None)
             print(f"General Path {path}")
             moves = self.getMoves(path)
-            agent.graph.plot(agent.map)
+            self.graph.plot(self.map)
             print(moves)
             self.__executeMoves(moves)
-            agent.render()
-            agent.graph.plot(agent.map)
+            self.render()
+            self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x, self.y), (stairLocation[1], stairLocation[0])))
@@ -258,7 +258,7 @@ if __name__ == "__main__":
     agent.buildGraph()
     print(agent.graph)
     agent.env.render()
-    agent.graph.plot(agent.map)
+    agent.graph.plot(agent.map, agent)
 
     # Let's try and play
     agent.play()

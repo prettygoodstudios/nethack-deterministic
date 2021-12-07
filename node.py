@@ -61,7 +61,7 @@ class GraphNode():
     def __lt__(self, other):
         return True
 
-    def plot(self, map: PathFindingMap) -> str:
+    def plot(self, map: PathFindingMap, agent) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
         yVals = range(0, map.getEnviromentDimensions()[0])
@@ -77,6 +77,9 @@ class GraphNode():
                     rect = patches.Rectangle((x,y), 1,1)
                     axes.add_patch(rect)
                 if map.isDoor(y,x):
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    axes.add_patch(rect)
+                if map.isNewRoute(agent, y,x):
                     rect = patches.Rectangle((x,y), 1,1, facecolor='r')
                     axes.add_patch(rect)
 
