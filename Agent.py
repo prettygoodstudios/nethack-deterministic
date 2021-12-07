@@ -24,7 +24,8 @@ class Agent:
     map = None
     heatmap_graph = None
     pQueue = None
-    def __init__(self, type):
+    print_bool = True
+    def __init__(self, type, print_bool=True):
         self.env = gym.make(type)
         obs = self.env.reset()
         self.map = Map(self.env, obs)
@@ -33,19 +34,26 @@ class Agent:
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.heatmap_graph = GraphBuilder(["heat_pos"])
         self.visited = set()
+        self.print_bool = print_bool
 
     def play(self):
         while True:
             _, destination = heappop(self.pQueue)
-            print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
+            if self.print_bool:
+                print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
             path = self.generalGraphAStar(self.graph, destination, None)
-            print(f"General Path {path}")
+            if self.print_bool:
+                print(f"General Path {path}")
             moves = self.getMoves(path)
-            self.graph.plot(self.map, self)
-            print(moves)
+            if moves == None:
+                continue
+            if self.print_bool:
+                self.graph.plot(self.map, self)
+                print(moves)
             self.__executeMoves(moves)
+            if self.print_bool:
+                self.graph.plot(self.map, self)
             self.render()
-            self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
@@ -264,3 +272,6 @@ if __name__ == "__main__":
 
     # Let's try and play
     agent.play()
+    agent.graph.plot(agent.map, agent)
+    agent.env.render()
+
