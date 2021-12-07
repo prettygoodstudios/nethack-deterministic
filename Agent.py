@@ -32,6 +32,7 @@ class Agent:
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.heatmap_graph = GraphBuilder(["heat_pos"])
+        self.visited = set()
 
     def play(self):
         while True:
@@ -165,6 +166,7 @@ class Agent:
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.visited.add((self.y_pos, self.x_pos))
         self.buildGraph()
 
     def render(self):
