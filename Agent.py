@@ -20,7 +20,7 @@ class Agent:
     env = None
     map = None
     heatmap_graph = None
-
+    pQueue = None
     def __init__(self, type):
         self.env = gym.make(type)
         obs = self.env.reset()
@@ -144,11 +144,14 @@ class Agent:
         """Builds initial graph"""
         doors = [(self.x_pos, self.y_pos)]
         doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        prioQue = []
+        prioQue = heapify(prioQue)
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
                 if self.map.isDoor(y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
+                    heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
         for i1, door1 in enumerate(doors):
             for i2, door2 in enumerate(doors):
                 if i1 != i2:
