@@ -53,7 +53,7 @@ class Agent:
             self.__executeMoves(moves)
             if self.print_bool:
                 self.graph.plot(self.map, self)
-            self.render()
+                self.render()
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
