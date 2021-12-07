@@ -36,12 +36,14 @@ class Agent:
 
     def play(self):
         while True:
-            _, destination = heappop(self.pQueue)
-            print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
-            path = self.generalGraphAStar(self.graph, destination, None)
-            print(f"General Path {path}")
+            self.buildGraph()
+            path = None
+            while path is None:
+                _, destination = heappop(self.pQueue)
+                print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
+                path = self.generalGraphAStar(self.graph, destination, None)
+                print(f"General Path {path}")
             moves = self.getMoves(path)
-            self.graph.plot(self.map, self)
             print(moves)
             self.__executeMoves(moves)
             self.render()
@@ -50,15 +52,22 @@ class Agent:
             if stairLocation is not None:
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
                 self.__executeMoves(stairMoves)
+                self.render()
+                self.graph.plot(self.map, self)
                 break
 
     def __executeMoves(self, moves: list):
         for move in moves:
             startX, startY = self.getX(), self.getY()
+            count = 0
             while True:
                 for m in move:
                     self.step(m)
+                count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
+                    break
+                if count > 100:
+                    print("Move not working: {m}")
                     break
 
     def getX(self):
@@ -167,7 +176,6 @@ class Agent:
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.visited.add((self.y_pos, self.x_pos))
-        self.buildGraph()
 
     def render(self):
         self.env.render()
@@ -257,10 +265,6 @@ class Agent:
 
 if __name__ == "__main__":
     agent = Agent("NetHackScore-v0")
-    agent.buildGraph()
-    print(agent.graph)
-    agent.env.render()
-    agent.graph.plot(agent.map, agent)
 
     # Let's try and play
     agent.play()

@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import patches
+from time import time
 
 from astar import PathFindingMap
 
@@ -102,4 +103,4 @@ class GraphNode():
         traverse(self)
         plt.axis('scaled')
         plt.gca().invert_yaxis()
-        plt.show()
+        plt.savefig(f"images/plot-{time()}.png")
