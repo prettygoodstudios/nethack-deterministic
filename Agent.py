@@ -158,6 +158,7 @@ class Agent:
                     path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+        self.pQueue = prioQue
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
