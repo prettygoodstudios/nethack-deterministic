@@ -31,6 +31,31 @@ class Agent:
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.heatmap_graph = GraphBuilder(["heat_pos"])
 
+    def play(self):
+        while True:
+            destination = heappop(self.queue)
+            path = self.generalGraphAStar(self.graph, destination, None)
+            moves = self.getMoves(path)
+            agent.graph.plot(agent.map)
+            print(moves)
+            self.__executeMoves(moves)
+            agent.render()
+            agent.graph.plot(agent.map)
+            stairLocation = self.map.findStairs()
+            if stairLocation is not None:
+                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x, self.y), (stairLocation[1], stairLocation[0])))
+                self.__executeMoves(stairMoves)
+                break
+
+    def __executeMoves(self, moves: list):
+        for move in moves:
+            startX, startY = self.getX(), self.getY()
+            while True:
+                for m in move:
+                    self.step(m)
+                if (startX, startY) != (self.getX(), self.getY()):
+                    break
+
     def getX(self):
         return self.x_pos 
     
