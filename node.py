@@ -101,4 +101,5 @@ class GraphNode():
                 traverse(edge.getTo())
         traverse(self)
         plt.axis('scaled')
+        plt.gca().invert_yaxis()
         plt.show()
