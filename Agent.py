@@ -11,7 +11,7 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-
+from heuristics import furthestDistanceFromMean
 
 class Agent:
     score = 0
