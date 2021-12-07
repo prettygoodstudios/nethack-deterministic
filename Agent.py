@@ -1,3 +1,4 @@
+# from _typeshed import _T_co
 import gym
 from gym.spaces.box import Box
 import nle
@@ -31,6 +32,33 @@ class Agent:
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.heatmap_graph = GraphBuilder(["heat_pos"])
+
+    def play(self):
+        while True:
+            _, destination = heappop(self.pQueue)
+            print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
+            path = self.generalGraphAStar(self.graph, destination, None)
+            print(f"General Path {path}")
+            moves = self.getMoves(path)
+            agent.graph.plot(agent.map)
+            print(moves)
+            self.__executeMoves(moves)
+            agent.render()
+            agent.graph.plot(agent.map)
+            stairLocation = self.map.findStairs()
+            if stairLocation is not None:
+                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x, self.y), (stairLocation[1], stairLocation[0])))
+                self.__executeMoves(stairMoves)
+                break
+
+    def __executeMoves(self, moves: list):
+        for move in moves:
+            startX, startY = self.getX(), self.getY()
+            while True:
+                for m in move:
+                    self.step(m)
+                if (startX, startY) != (self.getX(), self.getY()):
+                    break
 
     def getX(self):
         return self.x_pos 
@@ -149,7 +177,7 @@ class Agent:
         prioQue = []
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
-                if self.map.isDoor(y, x):
+                if self.map.isDoor(y, x) and (self.y_pos, self.x_pos) != (y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
                     heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
@@ -160,49 +188,45 @@ class Agent:
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
         self.pQueue = prioQue
-        b = heappop(prioQue)
-        c = heappop(prioQue)
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
         queue = []
-        queue = heapify(queue)
-        queue.heappush((0, start))
+        # queue = heapify(queue)
+        heappush(queue, (0, start))
 
-        cameFrom = {start: (None, None)}
-        costs = {start: 0}
+        cameFrom = {str(start.y)+","+str(start.x): (None, None)}
+        costs = {str(start.y)+","+str(start.x): 0}
 
         while(len(queue) > 0):
-            currentNode = queue.heappop()
+            currentNode = heappop(queue)[1]
             if(currentNode == target):
-                return self.getPath(start, cameFrom)
-            for path in currentNode.getEdges:
-                possibleCost = costs[currentNode] + path.getPathCost()
-                if(path.__to != currentNode):
-                    to = path.__to
-                    pth = to.getPath()
-                else:
-                    to = path.__from
-                    pth = reversed(to.getPath())
+                return self.getPath(start, target, cameFrom)
+            for path in currentNode.getEdges():
+                possibleCost = costs[str(currentNode.y)+","+str(currentNode.x)] + path.getPathCost()
+                to = path.getTo()
+                pth = path.getPath()
                 try:
-                    if(possibleCost < costs[to]):
-                        costs[to] = possibleCost
-                        queue.heappush((possibleCost + heuristic(to, target), to))
-                        cameFrom[to] = (currentNode, pth)
+                    if(possibleCost < costs[str(to.y)+","+str(to.x)]):
+                        costs[str(to.y)+","+str(to.x)] = possibleCost
+                        heappush(queue, (possibleCost + path.getPathCost(), to))
+                        # queue.heappush((possibleCost + heuristic(to, target), to))
+                        cameFrom[str(to.y)+","+str(to.x)] = (currentNode, pth)
                 except:
-                    costs[to] = possibleCost
-                    queue.heappush((possibleCost + heuristic(to, target), to))
-                    cameFrom[to] = (currentNode, pth)
+                    costs[str(to.y)+","+str(to.x)] = possibleCost
+                    heappush(queue, (possibleCost + path.getPathCost(), to))
+                    # queue.heappush((possibleCost + heuristic(to, target), to))
+                    cameFrom[str(to.y)+","+str(to.x)] = (currentNode, pth)
         return None
 
-    def getPath(self, target, cameFrom):
+    def getPath(self, start, target, cameFrom):
         path = []
         c_node = target
         while True:
-            if(cameFrom[c_node][0] == None):
+            if(cameFrom[str(c_node.y)+","+str(c_node.x)][0] == None):
                 return path
-            path = path + cameFrom[c_node][1]
-            c_node = cameFrom[c_node][0]
+            path = path + cameFrom[str(c_node.y)+","+str(c_node.x)][1]
+            c_node = cameFrom[str(c_node.y)+","+str(c_node.x)][0]
 
     def logPath(self, path):
         for point in path:
@@ -235,3 +259,6 @@ if __name__ == "__main__":
     print(agent.graph)
     agent.env.render()
     agent.graph.plot(agent.map)
+
+    # Let's try and play
+    agent.play()
