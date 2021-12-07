@@ -41,7 +41,7 @@ class Agent:
             path = self.generalGraphAStar(self.graph, destination, None)
             print(f"General Path {path}")
             moves = self.getMoves(path)
-            self.graph.plot(self.map)
+            self.graph.plot(self.map, self)
             print(moves)
             self.__executeMoves(moves)
             self.render()

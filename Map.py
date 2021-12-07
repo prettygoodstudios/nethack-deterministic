@@ -17,20 +17,39 @@ class Map:
     def isNewRoute(self, a, y, x):
         y_bound = self.getEnviromentDimensions()[0]-1
         x_bound = self.getEnviromentDimensions()[1]-1
-        if (y, x) not in a.visited:
-            if(y == 0 and x == 0):
-                return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
-            elif(y == y_bound and x == x_bound):
-                return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32)
-            elif(y == 0):
-                return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32 or self.map[y+1][x-1] != 32 or self.map[y][x-1] != 32)
-            elif(x == 0):
-                return (self.map[y][x+1] != 32 or self.map[y+1][x] != 32 or self.map[y+1][x+1] != 32 or self.map[y-1][x+1] != 32 or self.map[y-1][x] != 32)
-            elif(y == y_bound):
-                return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32)
-            elif(x == x_bound):
-                return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32)
-            return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
+        if (y, x) not in a.visited or self.isWall(y,x):
+            return False
+        isNew = False
+        if y > 0:
+            isNew = isNew or self.map[y-1][x] == 32
+        if y < y_bound:
+            isNew = isNew or self.map[y-1][x] == 32
+        if x > 0:
+            isNew = isNew or self.map[y][x-1] == 32
+        if x < x_bound:
+            isNew = isNew or self.map[y][x+1] == 32
+        if y > 0 and x > 0:
+            isNew = isNew or self.map[y-1][x-1] == 32
+        if y > 0 and x < x_bound:
+            isNew = isNew or self.map[y-1][x+1] == 32
+        if y < y_bound and x < x_bound:
+            isNew = isNew or self.map[y+1][x+1] == 32
+        if y < y_bound and x > 0:
+            isNew = isNew or self.map[y+1][x-1] == 32
+        return isNew
+            #if(y == 0 and x == 0):
+            #    return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
+            #elif(y == y_bound and x == x_bound):
+            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32)
+            #elif(y == 0):
+            #    return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32 or self.map[y+1][x-1] != 32 or self.map[y][x-1] != 32)
+            #elif(x == 0):
+            #    return (self.map[y][x+1] != 32 or self.map[y+1][x] != 32 or self.map[y+1][x+1] != 32 or self.map[y-1][x+1] != 32 or self.map[y-1][x] != 32)
+            #elif(y == y_bound):
+            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32)
+            #elif(x == x_bound):
+            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32)
+            #return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
         
 
     def isDoor(self, y, x):
