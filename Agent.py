@@ -147,7 +147,6 @@ class Agent:
         doors = [(self.x_pos, self.y_pos)]
         doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
         prioQue = []
-        prioQue = heapify(prioQue)
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
                 if self.map.isDoor(y, x):
@@ -161,6 +160,8 @@ class Agent:
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
         self.pQueue = prioQue
+        b = heappop(prioQue)
+        c = heappop(prioQue)
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
