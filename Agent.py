@@ -11,7 +11,7 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-
+from astar import Node
 
 class Agent:
     score = 0
@@ -200,6 +200,13 @@ class Agent:
     def logPath(self, path):
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
+    
+    def addDoor(self, y,x):
+        if(self.map[y][x] == 124 or self.map[y][x] == 45):
+            if(self.colors[y][x] == 7): #Checks if not a door
+                return False
+            else: #add door by calling A* 
+                self.map[y][x] = astar.Node((y,x), self.map[y][x], self)
 
     def findMeanVisitedPosition(self):
         """Finds the mean visited position using floor as a proxy"""
@@ -221,5 +228,3 @@ if __name__ == "__main__":
     print(agent.graph)
     agent.env.render()
     agent.graph.plot(agent.map)
-    
-
