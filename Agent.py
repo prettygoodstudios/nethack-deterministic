@@ -41,14 +41,14 @@ class Agent:
             path = self.generalGraphAStar(self.graph, destination, None)
             print(f"General Path {path}")
             moves = self.getMoves(path)
-            agent.graph.plot(agent.map)
+            self.graph.plot(self.map, self)
             print(moves)
             self.__executeMoves(moves)
-            agent.render()
-            agent.graph.plot(agent.map)
+            self.render()
+            self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
-                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x, self.y), (stairLocation[1], stairLocation[0])))
+                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
                 self.__executeMoves(stairMoves)
                 break
 
@@ -179,7 +179,7 @@ class Agent:
         prioQue = []
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
-                if self.map.isDoor(y, x) and (self.y_pos, self.x_pos) != (y, x):
+                if (self.map.isDoor(y, x) or self.map.isNewRoute(self, y, x)) and (self.y_pos, self.x_pos) != (y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
                     heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     agent.buildGraph()
     print(agent.graph)
     agent.env.render()
-    agent.graph.plot(agent.map)
+    agent.graph.plot(agent.map, agent)
 
     # Let's try and play
     agent.play()
