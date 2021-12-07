@@ -12,7 +12,9 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
+from heuristics import furthestDistanceFromMean
 
+from astar import Node
 
 class Agent:
     score = 0
@@ -21,7 +23,7 @@ class Agent:
     env = None
     map = None
     heatmap_graph = None
-
+    pQueue = None
     def __init__(self, type):
         self.env = gym.make(type)
         obs = self.env.reset()
@@ -170,17 +172,22 @@ class Agent:
         """Builds initial graph"""
         doors = [(self.x_pos, self.y_pos)]
         doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        prioQue = []
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
                 if self.map.isDoor(y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
+                    heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
         for i1, door1 in enumerate(doors):
             for i2, door2 in enumerate(doors):
                 if i1 != i2:
                     path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+        self.pQueue = prioQue
+        b = heappop(prioQue)
+        c = heappop(prioQue)
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
@@ -224,6 +231,13 @@ class Agent:
     def logPath(self, path):
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
+    
+    def addDoor(self, y,x):
+        if(self.map[y][x] == 124 or self.map[y][x] == 45):
+            if(self.colors[y][x] == 7): #Checks if not a door
+                return False
+            else: #add door by calling A* 
+                self.map[y][x] = astar.Node((y,x), self.map[y][x], self)
 
     def findMeanVisitedPosition(self):
         """Finds the mean visited position using floor as a proxy"""
@@ -245,5 +259,3 @@ if __name__ == "__main__":
     print(agent.graph)
     agent.env.render()
     agent.graph.plot(agent.map)
-    
-
