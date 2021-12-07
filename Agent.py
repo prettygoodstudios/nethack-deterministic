@@ -11,6 +11,8 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
+from heuristics import furthestDistanceFromMean
+
 from astar import Node
 
 class Agent:
@@ -20,7 +22,7 @@ class Agent:
     env = None
     map = None
     heatmap_graph = None
-
+    pQueue = None
     def __init__(self, type):
         self.env = gym.make(type)
         obs = self.env.reset()
@@ -144,17 +146,21 @@ class Agent:
         """Builds initial graph"""
         doors = [(self.x_pos, self.y_pos)]
         doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        prioQue = []
+        prioQue = heapify(prioQue)
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
                 if self.map.isDoor(y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
+                    heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
         for i1, door1 in enumerate(doors):
             for i2, door2 in enumerate(doors):
                 if i1 != i2:
                     path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
                     if not path is None:
                         doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+        self.pQueue = prioQue
         self.graph = doorLookup[(self.x_pos, self.y_pos)]
 
     def generalGraphAStar(self, start, target, heuristic):
