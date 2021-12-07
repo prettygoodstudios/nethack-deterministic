@@ -235,7 +235,7 @@ class Agent:
         while True:
             if(cameFrom[str(c_node.y)+","+str(c_node.x)][0] == None):
                 return path
-            path = path + cameFrom[str(c_node.y)+","+str(c_node.x)][1]
+            path = cameFrom[str(c_node.y)+","+str(c_node.x)][1] + path[1:] 
             c_node = cameFrom[str(c_node.y)+","+str(c_node.x)][0]
 
     def logPath(self, path):
