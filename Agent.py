@@ -35,8 +35,9 @@ class Agent:
 
     def play(self):
         while True:
-            destination = heappop(self.queue)
+            _, destination = heappop(self.pQueue)
             path = self.generalGraphAStar(self.graph, destination, None)
+            print(f"General Path {path}")
             moves = self.getMoves(path)
             agent.graph.plot(agent.map)
             print(moves)
@@ -259,3 +260,6 @@ if __name__ == "__main__":
     print(agent.graph)
     agent.env.render()
     agent.graph.plot(agent.map)
+
+    # Let's try and play
+    agent.play()
