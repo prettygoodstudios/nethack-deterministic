@@ -13,6 +13,7 @@ from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
 from heuristics import furthestDistanceFromMean
+from main import MoveActions
 
 from astar import Node
 
@@ -57,12 +58,27 @@ class Agent:
                 break
 
     def __executeMoves(self, moves: list):
+        actionDirection = {
+            MoveActions.UP.value: (0, -1),
+            MoveActions.DOWN.value: (0, 1),
+            MoveActions.LEFT.value: (-1, 0),
+            MoveActions.RIGHT.value: (1, 0),
+            MoveActions.UP_RIGHT.value: (1, -1),
+            MoveActions.DOWN_LEFT.value: (-1, 1),
+            MoveActions.DOWN_RIGHT.value: (1, 1),
+            MoveActions.UP_LEFT.value: (-1, -1)
+        }
         for move in moves:
             startX, startY = self.getX(), self.getY()
             count = 0
             while True:
-                for m in move:
-                    self.step(m)
+                for i, m in enumerate(move):
+                    if m == 20:
+                        dx, dy = actionDirection[move[i+1]]
+                        if not self.map.isPet(self.getY()+dy, self.getX()+dx):
+                            self.step(m)
+                    else:
+                        self.step(m)
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
                     break
@@ -190,7 +206,8 @@ class Agent:
                 if (self.map.isDoor(y, x) or self.map.isNewRoute(self, y, x)) and (self.y_pos, self.x_pos) != (y, x):
                     doors.append((x, y))
                     doorLookup[(x,y)] = GraphNode([], x, y)
-                    heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
+                    if not (y,x) in self.visited:
+                        heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
         for i1, door1 in enumerate(doors):
             for i2, door2 in enumerate(doors):
                 if i1 != i2:
@@ -238,7 +255,7 @@ class Agent:
             path = cameFrom[str(c_node.y)+","+str(c_node.x)][1] + path[1:] 
             c_node = cameFrom[str(c_node.y)+","+str(c_node.x)][0]
 
-    def logPath(self, path):
+    def logPath(self, path):    
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
     

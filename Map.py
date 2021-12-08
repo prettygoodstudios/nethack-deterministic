@@ -67,6 +67,9 @@ class Map:
                 elif((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and (self.map[y-1][x] == 32 or self.map[y+1][x] == 32) and self.isNotWall(y, x)):
                     return True
         return False
+
+    def isPet(self, y, x):
+        return self.map[y][x] in set([102, 100, 117])
     
     def isInRoom(self, y, x):
         if(self.map[y][x] == 46):

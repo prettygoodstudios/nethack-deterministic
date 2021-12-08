@@ -80,6 +80,9 @@ class GraphNode():
                 if map.isNewRoute(agent,y,x):
                     rect = patches.Rectangle((x,y), 1,1, facecolor='g')
                     axes.add_patch(rect)
+                if map.isPet(y, x):
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    axes.add_patch(rect)
                 #if map.isDoor(y,x):
                 #    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
                 #    axes.add_patch(rect)
@@ -103,4 +106,4 @@ class GraphNode():
         traverse(self)
         plt.axis('scaled')
         plt.gca().invert_yaxis()
-        plt.savefig(f"images/plot-{time()}.png")
+        plt.savefig(f"images/plot-{time()}.png", dpi=300)
