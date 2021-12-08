@@ -14,6 +14,8 @@ from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
 from heuristics import furthestDistanceFromMean
 from main import MoveActions
+from time import time
+from sys import exit
 
 from astar import Node
 
@@ -34,6 +36,8 @@ class Agent:
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.heatmap_graph = GraphBuilder(["heat_pos"])
         self.visited = set()
+        self.locationStack = []
+        self.graphNodes = {}
 
     def play(self):
         while True:
@@ -48,16 +52,17 @@ class Agent:
             print(moves)
             self.__executeMoves(moves)
             self.render()
-            self.graph.plot(self.map, self)
+            #self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
+                print("Found Staircase")
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
                 self.__executeMoves(stairMoves)
                 self.render()
-                self.graph.plot(self.map, self)
-                break
+                exit()
 
     def __executeMoves(self, moves: list):
+        start = time()
         actionDirection = {
             MoveActions.UP.value: (0, -1),
             MoveActions.DOWN.value: (0, 1),
@@ -85,6 +90,7 @@ class Agent:
                 if count > 100:
                     print("Move not working: {m}")
                     break
+        print(f"Execute Move Time: {time() - start}")
 
     def getX(self):
         return self.x_pos 
@@ -186,36 +192,70 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
+        start = time()
         obs, *rest = self.env.step(action)
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.visited.add((self.y_pos, self.x_pos))
+        print(f"Step time {time() - start}")
 
     def render(self):
         self.env.render()
 
     def buildGraph(self):
         """Builds initial graph"""
-        doors = [(self.x_pos, self.y_pos)]
-        doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        start = time()
+        if not (self.x_pos, self.y_pos) in self.graphNodes:
+            self.graphNodes[(self.x_pos, self.y_pos)] = GraphNode([], self.x_pos, self.y_pos)
+        newNodes = []
         prioQue = []
+
+        # Build queue and find new nodes
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
                 if (self.map.isDoor(y, x) or self.map.isNewRoute(self, y, x)) and (self.y_pos, self.x_pos) != (y, x):
-                    doors.append((x, y))
-                    doorLookup[(x,y)] = GraphNode([], x, y)
                     if not (y,x) in self.visited:
-                        heappush(prioQue, (furthestDistanceFromMean(self, doorLookup[(x,y)]), doorLookup[(x,y)]))
-        for i1, door1 in enumerate(doors):
-            for i2, door2 in enumerate(doors):
-                if i1 != i2:
-                    path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
-                    if not path is None:
-                        doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
+                        if not (x,y) in self.graphNodes:
+                            newNodes.append((x, y))
+                            self.graphNodes[(x,y)] = GraphNode([], x, y)
+                        heappush(prioQue, (furthestDistanceFromMean(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
+
+        # Remove old current location node
+        if len(self.locationStack) > 0:
+            ourLocation = self.locationStack[-1]
+            if not self.map.isDoor(ourLocation[1], ourLocation[0]):
+                del self.graphNodes[ourLocation]
+                for door in self.graphNodes:
+                    self.graphNodes[door].removeEdge(ourLocation)
+
+        # Add new current location node edges
+        for door in self.graphNodes:
+            ourLocation = (self.x_pos,self.y_pos)
+            if door != ourLocation:
+                path = findPathInGridWorld(self.map, ourLocation, door, ignoreDoors=False)
+                if not path is None:
+                    self.graphNodes[ourLocation].addEdge(GraphEdge(self.graphNodes[ourLocation], self.graphNodes[door], path))
+                    self.graphNodes[door].addEdge(GraphEdge(self.graphNodes[door], self.graphNodes[ourLocation], list(reversed(path))))
+
+        # Add edges to new nodes
+        tried = set()
+        for i1, door1 in enumerate(newNodes):
+            for i2, door2 in enumerate(self.graphNodes):
+                cacheKey = tuple(sorted([door1, door2]))
+                if door1 != door2:
+                    if not cacheKey in tried:
+                        tried.add(cacheKey)
+                        path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
+                        if not path is None:
+                            self.graphNodes[door1].addEdge(GraphEdge(self.graphNodes[door1], self.graphNodes[door2], path))
+                            self.graphNodes[door2].addEdge(GraphEdge(self.graphNodes[door2], self.graphNodes[door1], list(reversed(path))))
+        
         self.pQueue = prioQue
-        self.graph = doorLookup[(self.x_pos, self.y_pos)]
+        self.graph = self.graphNodes[(self.x_pos, self.y_pos)]
+        self.locationStack.append((self.x_pos, self.y_pos))
+        print(f"Graph Build Time: {time()-start}")
 
     def generalGraphAStar(self, start, target, heuristic):
         queue = []
