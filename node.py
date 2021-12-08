@@ -62,6 +62,15 @@ class GraphNode():
     def __lt__(self, other):
         return True
 
+    def removeEdge(self, toPosition: tuple):
+        """Removes edges that go to to position"""
+        removeEdges = []
+        for edge in self.edges:
+            if (edge.getTo().x, edge.getTo().y) == toPosition:
+                removeEdges.append(edge)
+        for edge in removeEdges:
+            self.edges.remove(edge)
+            
     def plot(self, map: PathFindingMap, agent) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
