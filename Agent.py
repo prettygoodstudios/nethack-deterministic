@@ -15,6 +15,7 @@ from utils.graphs import GraphBuilder
 from heuristics import furthestDistanceFromMean
 from main import MoveActions
 from time import time
+from sys import exit
 
 from astar import Node
 
@@ -54,11 +55,11 @@ class Agent:
             #self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
+                print("Found Staircase")
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
                 self.__executeMoves(stairMoves)
                 self.render()
-                self.graph.plot(self.map, self)
-                break
+                exit()
 
     def __executeMoves(self, moves: list):
         start = time()
@@ -206,8 +207,9 @@ class Agent:
     def buildGraph(self):
         """Builds initial graph"""
         start = time()
-        newNodes = [(self.x_pos, self.y_pos)]
-        self.graphNodes[(self.x_pos, self.y_pos)] = GraphNode([], self.x_pos, self.y_pos)
+        if not (self.x_pos, self.y_pos) in self.graphNodes:
+            self.graphNodes[(self.x_pos, self.y_pos)] = GraphNode([], self.x_pos, self.y_pos)
+        newNodes = []
         prioQue = []
 
         # Build queue and find new nodes
@@ -223,9 +225,10 @@ class Agent:
         # Remove old current location node
         if len(self.locationStack) > 0:
             ourLocation = self.locationStack[-1]
-            del self.graphNodes[ourLocation]
-            for door in self.graphNodes:
-                self.graphNodes[door].removeEdge(ourLocation)
+            if not self.map.isDoor(ourLocation[1], ourLocation[0]):
+                del self.graphNodes[ourLocation]
+                for door in self.graphNodes:
+                    self.graphNodes[door].removeEdge(ourLocation)
 
         # Add new current location node edges
         for door in self.graphNodes:
@@ -240,8 +243,8 @@ class Agent:
         tried = set()
         for i1, door1 in enumerate(newNodes):
             for i2, door2 in enumerate(self.graphNodes):
-                if i1 != i2:
-                    cacheKey = tuple(sorted([door1, door2]))
+                cacheKey = tuple(sorted([door1, door2]))
+                if door1 != door2:
                     if not cacheKey in tried:
                         tried.add(cacheKey)
                         path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)

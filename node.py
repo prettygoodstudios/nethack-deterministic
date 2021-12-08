@@ -70,7 +70,7 @@ class GraphNode():
                 removeEdges.append(edge)
         for edge in removeEdges:
             self.edges.remove(edge)
-            
+
     def plot(self, map: PathFindingMap, agent) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
