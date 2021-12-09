@@ -1,1 +1,21 @@
 trial, result, optimal, taken
+0,True,79,116
+1,Crashed (60, 3),0,0
+2,Crashed (52, 13),0,0
+3,False,0,20
+4,True,40,58
+5,False,0,9
+6,False,0,126
+7,False,0,135
+8,False,0,73
+9,True,21,19
+10,False,0,26
+11,Crashed index out of range,0,0
+12,False,0,22
+13,True,19,57
+14,Crashed isNewRoute() missing 1 required positional argument: 'x',0,0
+15,False,0,19
+16,Crashed index 21 is out of bounds for axis 0 with size 21,0,0
+17,True,35,38
+18,True,33,38
+19,Crashed (45, 14),0,0

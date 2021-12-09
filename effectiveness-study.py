@@ -3,6 +3,7 @@ from heuristics import furthestDistanceFromMeanAndClosestToUs
 from sys import exit, argv
 import traceback
 
+
 if __name__ == "__main__":
     # Let's try and play
     f = open("effectiveness.csv", "w")

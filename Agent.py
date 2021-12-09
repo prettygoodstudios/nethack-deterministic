@@ -86,6 +86,24 @@ class Agent:
 
     def __breakGlass(self):
         """Emergency algo"""
+        queue = list(map(lambda x: (0, x), self.map.identifySearchPoints()))
+        heapify(queue)
+ 
+        while len(queue) > 0:
+            path = None
+            while path is None:
+                _, destination = heappop(queue)
+                path = findPathInGridWorld(self.map, self.start, destination)
+            moves = self.getMoves(path)
+            self.__executeMoves(moves)
+            self.step(21)
+            height, width = self.map.getEnviromentDimensions()
+            for x in range(max(0, self.x_pos-1), min(width, self.x_pos+1)):
+                for y in range(max(0, self.y_pos-1), min(height, self.y_pos+1)):
+                    if self.map.isNewRoute(y, x):
+                        self.buildGraph()
+                        return
+
 
     def __executeMoves(self, moves: list):
         start = time()
