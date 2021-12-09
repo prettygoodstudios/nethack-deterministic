@@ -65,7 +65,7 @@ class Agent:
             except:
                 return False, 0, self.moves
             self.render()
-            self.graph.plot(self.map, self, searchPoints=True)
+            #self.graph.plot(self.map, self, searchPoints=True)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 print("Found Staircase")
