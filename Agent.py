@@ -12,10 +12,12 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-from heuristics import furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
+from heuristics import closestToStairCase, furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
 from main import MoveActions
 from time import time
 from sys import exit
+from matplotlib import pyplot as plt
+from matplotlib import patches
 
 from astar import Node
 
@@ -28,7 +30,7 @@ class Agent:
     heatmap_graph = None
     pQueue = None
 
-    def __init__(self, type):
+    def __init__(self, type, heuristic):
         self.env = gym.make(type)
         obs = self.env.reset()
         self.map = Map(self.env, obs)
@@ -41,6 +43,7 @@ class Agent:
         self.locationStack = []
         self.graphNodes = {}
         self.moves = 0
+        self.heuristic = heuristic
 
     def play(self) -> bool:
         """Plays game returns true if found staircase otherwise false"""
@@ -48,6 +51,8 @@ class Agent:
             self.buildGraph()
             path = None
             while path is None:
+                if len(self.pQueue) == 0:
+                    # Breaks glass
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
@@ -58,7 +63,7 @@ class Agent:
                 self.visited.add(path[-1])
                 self.__executeMoves(moves)
             except:
-                return False, 0, 0
+                return False, 0, self.moves
             self.render()
             #self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
@@ -66,6 +71,7 @@ class Agent:
                 print("Found Staircase")
                 path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0]))
                 if not path is None:
+                    self.heuristic = closestToStairCase
                     stairMoves = self.getMoves(path)
                     try:
                         self.__executeMoves(stairMoves)
@@ -233,7 +239,7 @@ class Agent:
                         if not (x,y) in self.graphNodes:
                             newNodes.append((x, y))
                             self.graphNodes[(x,y)] = GraphNode([], x, y)
-                        heappush(prioQue, (furthestDistanceFromMeanAndClosestToUs(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
+                        heappush(prioQue, (self.heuristic(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
 
         # Remove old current location node
         if len(self.locationStack) > 0:
@@ -319,7 +325,7 @@ class Agent:
             else: #add door by calling A* 
                 self.map[y][x] = astar.Node((y,x), self.map[y][x], self)
 
-    def findMeanVisitedPosition(self):
+    def findMeanVisiblePositions(self):
         """Finds the mean visited position using floor as a proxy"""
         height, width = self.map.getEnviromentDimensions()
         sumX = 0
@@ -333,8 +339,21 @@ class Agent:
                     sumY += row 
         return (sumX/count, sumY/count)
 
+    def plotVisited(self):
+        height, width = self.map.getEnviromentDimensions()
+        axes = plt.axes()
+        for y in range(height):
+            for x in range(width):
+                if (y,x) in self.visited:
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                    axes.add_patch(rect)
+                if self.map.isWall(y,x):
+                    rect = patches.Rectangle((x,y), 1,1)
+                    axes.add_patch(rect)
+        plt.show()
+
 if __name__ == "__main__":
-    agent = Agent("NetHackScore-v0")
+    agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
 
     # Let's try and play
     agent.play()
