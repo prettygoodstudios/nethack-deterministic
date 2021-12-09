@@ -12,7 +12,14 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
+from heuristics import closestToStairCase, furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
+from main import MoveActions
+from time import time
+from sys import exit
+from matplotlib import pyplot as plt
+from matplotlib import patches
 
+from astar import Node
 
 class Agent:
     score = 0
@@ -21,15 +28,91 @@ class Agent:
     env = None
     map = None
     heatmap_graph = None
+    pQueue = None
 
-    def __init__(self, type):
+    def __init__(self, type, heuristic):
         self.env = gym.make(type)
         obs = self.env.reset()
         self.map = Map(self.env, obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.start = (self.x_pos, self.y_pos)
         self.heatmap_graph = GraphBuilder(["heat_pos"])
+        self.visited = set()
+        self.locationStack = []
+        self.graphNodes = {}
+        self.moves = 0
+        self.heuristic = heuristic
+
+    def play(self) -> bool:
+        """Plays game returns true if found staircase otherwise false"""
+        while True:
+            self.buildGraph()
+            path = None
+            while path is None:
+                if len(self.pQueue) == 0:
+                    # Breaks glass
+                    pass
+                _, destination = heappop(self.pQueue)
+                print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
+                path = self.generalGraphAStar(self.graph, destination, None)
+                print(f"General Path {path}")
+            moves = self.getMoves(path)
+            print(moves)
+            try:
+                self.visited.add(path[-1])
+                self.__executeMoves(moves)
+            except:
+                return False, 0, self.moves
+            self.render()
+            self.graph.plot(self.map, self, searchPoints=True)
+            stairLocation = self.map.findStairs()
+            if stairLocation is not None:
+                print("Found Staircase")
+                path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0]))
+                if not path is None:
+                    self.heuristic = closestToStairCase
+                    stairMoves = self.getMoves(path)
+                    try:
+                        self.__executeMoves(stairMoves)
+                    except:
+                        return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+                    self.render()
+                    return True, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+
+    def __executeMoves(self, moves: list):
+        start = time()
+        actionDirection = {
+            MoveActions.UP.value: (0, -1),
+            MoveActions.DOWN.value: (0, 1),
+            MoveActions.LEFT.value: (-1, 0),
+            MoveActions.RIGHT.value: (1, 0),
+            MoveActions.UP_RIGHT.value: (1, -1),
+            MoveActions.DOWN_LEFT.value: (-1, 1),
+            MoveActions.DOWN_RIGHT.value: (1, 1),
+            MoveActions.UP_LEFT.value: (-1, -1)
+        }
+        for move in moves:
+            startX, startY = self.getX(), self.getY()
+            count = 0
+            while True:
+                for i, m in enumerate(move):
+                    if m == 20:
+                        dx, dy = actionDirection[move[i+1]]
+                        if not self.map.isPet(self.getY()+dy, self.getX()+dx):
+                            self.step(m)
+                    else:
+                        self.step(m)
+                count += 1
+                if (startX, startY) != (self.getX(), self.getY()):
+                    self.moves += 1
+                    break
+                if count > 20:
+                    print(f"Move not working: {m}")
+                    self.render()
+                    break
+        print(f"Execute Move Time: {time() - start}")
 
     def getX(self):
         return self.x_pos 
@@ -43,31 +126,31 @@ class Agent:
         x = 1
         current = coords[0]
         for i in range(1, len(coords)):
-            if(coords[i][y]-1 == current[y] and coords[i][x]+1 == current[x]):
+            if(coords[i][y] == current[y]-1 and coords[i][x] == current[x]+1 and current[x] < 78 and current[y] > 0):
                 steps.append([5])
-            elif(coords[i][y]+1 == current[y] and coords[i][x]+1 == current[x]):
+            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]+1 and current[x] < 78 and current[y] < 20):
                 steps.append([6])
-            elif(coords[i][y]+1 == current[y] and coords[i][x]-1 == current[x]):
+            elif(coords[i][y] == current[y]+1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[y] < 20):
                 steps.append([7])
-            elif(coords[i][y]-1 == current[y] and coords[i][x]-1 == current[x]):
+            elif(coords[i][y] == current[y]-1 and coords[i][x] == current[x]-1 and current[x] > 0 and current[y] > 0):
                 steps.append([8])
-            elif(coords[i][y]-1 == current[y]):
-                if(self.map.isDoor(coords[i][y]-1, coords[i][x])): #Locked door, need to kick
+            elif(coords[i][y] == current[y]-1 and current[y] > 0):
+                if(self.map.isDoor(current[y]-1, current[x])): #Locked door, need to kick
                     steps.append([20, 1, 1])
                 else:
                     steps.append([1])
-            elif(coords[i][x]+1 == current[x]):
-                if(self.map.isDoor(coords[i][y], coords[i][x]+1)): #Locked door, need to kick
+            elif(coords[i][x] == current[x]+1 and current[x] < 78):
+                if(self.map.isDoor(current[y], current[x]+1)): #Locked door, need to kick
                     steps.append([20, 2, 2])
                 else:
                     steps.append([2])
-            elif(coords[i][y]+1 == current[y]):
-                if(self.map.isDoor(coords[i][y]+1, coords[i][x])): #Locked door, need to kick
+            elif(coords[i][y] == current[y]+1) and current[y] < 20:
+                if(self.map.isDoor(current[y]+1, current[x])): #Locked door, need to kick
                     steps.append([20, 3, 3])
                 else:
                     steps.append([3])
-            elif(coords[i][x]-1 == current[x]):
-                if(self.map.isDoor(coords[i][y], coords[i][x]-1)): #Locked door, need to kick
+            elif(coords[i][x] == current[x]-1) and current[x] > 0:
+                if(self.map.isDoor(current[y], current[x]-1)): #Locked door, need to kick
                     steps.append([20, 4, 4])
                 else:
                     steps.append([4])
@@ -131,32 +214,68 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        obs = self.env.step(action)
+        obs, *rest = self.env.step(action)
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
-        self.buildGraph()
+        self.visited.add((self.y_pos, self.x_pos))
 
     def render(self):
         self.env.render()
 
     def buildGraph(self):
         """Builds initial graph"""
-        doors = [(self.x_pos, self.y_pos)]
-        doorLookup = { (self.x_pos, self.y_pos): GraphNode([], self.x_pos, self.y_pos) }
+        start = time()
+        if not (self.x_pos, self.y_pos) in self.graphNodes:
+            self.graphNodes[(self.x_pos, self.y_pos)] = GraphNode([], self.x_pos, self.y_pos)
+        newNodes = []
+        prioQue = []
+
+        # Build queue and find new nodes
         for y in range(self.map.getEnviromentDimensions()[0]):
             for x in range(self.map.getEnviromentDimensions()[1]):
-                if self.map.isDoor(y, x):
-                    doors.append((x, y))
-                    doorLookup[(x,y)] = GraphNode([], x, y)
-        for i1, door1 in enumerate(doors):
-            for i2, door2 in enumerate(doors):
-                if i1 != i2:
-                    path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
-                    if not path is None:
-                        doorLookup[door1].addEdge(GraphEdge(doorLookup[door1], doorLookup[door2], path))
-        self.graph = doorLookup[(self.x_pos, self.y_pos)]
+                if (self.map.isDoor(y, x) or self.map.isNewRoute(self, y, x)) and (self.y_pos, self.x_pos) != (y, x):
+                    if not (y,x) in self.visited:
+                        if not (x,y) in self.graphNodes:
+                            newNodes.append((x, y))
+                            self.graphNodes[(x,y)] = GraphNode([], x, y)
+                        heappush(prioQue, (self.heuristic(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
+
+        # Remove old current location node
+        if len(self.locationStack) > 0:
+            ourLocation = self.locationStack[-1]
+            if not self.map.isDoor(ourLocation[1], ourLocation[0]):
+                del self.graphNodes[ourLocation]
+                for door in self.graphNodes:
+                    self.graphNodes[door].removeEdge(ourLocation)
+
+        # Add new current location node edges
+        for door in self.graphNodes:
+            ourLocation = (self.x_pos,self.y_pos)
+            if door != ourLocation:
+                path = findPathInGridWorld(self.map, ourLocation, door, ignoreDoors=False)
+                if not path is None:
+                    self.graphNodes[ourLocation].addEdge(GraphEdge(self.graphNodes[ourLocation], self.graphNodes[door], path))
+                    self.graphNodes[door].addEdge(GraphEdge(self.graphNodes[door], self.graphNodes[ourLocation], list(reversed(path))))
+
+        # Add edges to new nodes
+        tried = set()
+        for i1, door1 in enumerate(newNodes):
+            for i2, door2 in enumerate(self.graphNodes):
+                cacheKey = tuple(sorted([door1, door2]))
+                if door1 != door2:
+                    if not cacheKey in tried:
+                        tried.add(cacheKey)
+                        path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
+                        if not path is None:
+                            self.graphNodes[door1].addEdge(GraphEdge(self.graphNodes[door1], self.graphNodes[door2], path))
+                            self.graphNodes[door2].addEdge(GraphEdge(self.graphNodes[door2], self.graphNodes[door1], list(reversed(path))))
+        
+        self.pQueue = prioQue
+        self.graph = self.graphNodes[(self.x_pos, self.y_pos)]
+        self.locationStack.append((self.x_pos, self.y_pos))
+        print(f"Graph Build Time: {time()-start}")
 
     def generalGraphAStar(self, start, target, heuristic):
         queue = []
@@ -193,18 +312,49 @@ class Agent:
         while True:
             if(cameFrom[str(c_node.y)+","+str(c_node.x)][0] == None):
                 return path
-            path = path + cameFrom[str(c_node.y)+","+str(c_node.x)][1]
+            path = cameFrom[str(c_node.y)+","+str(c_node.x)][1] + path[1:] 
             c_node = cameFrom[str(c_node.y)+","+str(c_node.x)][0]
 
-    def logPath(self, path):
+    def logPath(self, path):    
         for point in path:
             self.heatmap_graph.append_point("heat_pos", point)
+    
+    def addDoor(self, y,x):
+        if(self.map[y][x] == 124 or self.map[y][x] == 45):
+            if(self.colors[y][x] == 7): #Checks if not a door
+                return False
+            else: #add door by calling A* 
+                self.map[y][x] = astar.Node((y,x), self.map[y][x], self)
+
+    def findMeanVisiblePositions(self):
+        """Finds the mean visited position using floor as a proxy"""
+        height, width = self.map.getEnviromentDimensions()
+        sumX = 0
+        sumY = 0
+        count = 0
+        for row in range(height):
+            for col in range(width):
+                if self.map.isNotWall(row, col):
+                    count += 1
+                    sumX += col 
+                    sumY += row 
+        return (sumX/count, sumY/count)
+
+    def plotVisited(self):
+        height, width = self.map.getEnviromentDimensions()
+        axes = plt.axes()
+        for y in range(height):
+            for x in range(width):
+                if (y,x) in self.visited:
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                    axes.add_patch(rect)
+                if self.map.isWall(y,x):
+                    rect = patches.Rectangle((x,y), 1,1)
+                    axes.add_patch(rect)
+        plt.show()
 
 if __name__ == "__main__":
-    agent = Agent("NetHackScore-v0")
-    agent.buildGraph()
-    print(agent.graph)
-    agent.env.render()
-    agent.graph.plot(agent.map)
-    
+    agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
 
+    # Let's try and play
+    agent.play()

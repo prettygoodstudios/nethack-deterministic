@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from matplotlib import patches
+from time import time
 
 from astar import PathFindingMap
 
@@ -61,24 +62,47 @@ class GraphNode():
     def __lt__(self, other):
         return True
 
-    def plot(self, map: PathFindingMap) -> str:
+    def removeEdge(self, toPosition: tuple):
+        """Removes edges that go to to position"""
+        removeEdges = []
+        for edge in self.edges:
+            if (edge.getTo().x, edge.getTo().y) == toPosition:
+                removeEdges.append(edge)
+        for edge in removeEdges:
+            self.edges.remove(edge)
+
+    def plot(self, map: PathFindingMap, agent, searchPoints=False) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
         yVals = range(0, map.getEnviromentDimensions()[0])
         xVals = range(0, map.getEnviromentDimensions()[1])
-        plt.yticks(yVals)
-        plt.xticks(xVals[::5])
+        #plt.yticks(yVals)
+        #plt.xticks(xVals[::5])
 
         # Draw the walls
         axes = plt.axes()
         for y in yVals:
             for x in xVals:
-                if map.isWall(y,x):
-                    rect = patches.Rectangle((x,y), 1,1)
-                    axes.add_patch(rect)
-                if map.isDoor(y,x):
-                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
-                    axes.add_patch(rect)
+                if(searchPoints):
+                    if map.isWall(y,x):
+                        rect = patches.Rectangle((x,y), 1,1)
+                        axes.add_patch(rect)
+                    if map.isSearchPoint(y,x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                        axes.add_patch(rect)
+                else:
+                    if map.isWall(y,x):
+                        rect = patches.Rectangle((x,y), 1,1)
+                        axes.add_patch(rect)
+                    if map.isNewRoute(agent,y,x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                        axes.add_patch(rect)
+                    if map.isPet(y, x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                        axes.add_patch(rect)
+                    #if map.isDoor(y,x):
+                    #    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    #    axes.add_patch(rect) 
 
         # Traverse and draw the nodes and edges
         def traverse(node: GraphNode):
@@ -89,11 +113,14 @@ class GraphNode():
                 return
             for edge in nonTraversedEdges:
                 traversedEdges.add(str(edge))
-                xPts = [x + 0.5 for x,y in edge.getPath()]
-                yPts = [y + 0.5 for x,y in edge.getPath()]
+                xPts = [x + 0.5 for y,x in edge.getPath()]
+                yPts = [y + 0.5 for y,x in edge.getPath()]
                 s = [10 for _ in edge.getPath()]
                 plt.scatter(xPts, yPts, s)
                 plt.plot(xPts, yPts)
                 traverse(edge.getTo())
         traverse(self)
+        plt.axis('scaled')
+        plt.gca().invert_yaxis()
         plt.show()
+        # plt.savefig(f"images/plot-{time()}.png", dpi=300)
