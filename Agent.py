@@ -12,7 +12,7 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-from heuristics import furthestDistanceFromMean
+from heuristics import furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
 from main import MoveActions
 from time import time
 from sys import exit
@@ -27,6 +27,7 @@ class Agent:
     map = None
     heatmap_graph = None
     pQueue = None
+
     def __init__(self, type):
         self.env = gym.make(type)
         obs = self.env.reset()
@@ -34,12 +35,15 @@ class Agent:
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.start = (self.x_pos, self.y_pos)
         self.heatmap_graph = GraphBuilder(["heat_pos"])
         self.visited = set()
         self.locationStack = []
         self.graphNodes = {}
+        self.moves = 0
 
-    def play(self):
+    def play(self) -> bool:
+        """Plays game returns true if found staircase otherwise false"""
         while True:
             self.buildGraph()
             path = None
@@ -50,16 +54,25 @@ class Agent:
                 print(f"General Path {path}")
             moves = self.getMoves(path)
             print(moves)
-            self.__executeMoves(moves)
+            try:
+                self.visited.add(path[-1])
+                self.__executeMoves(moves)
+            except:
+                return False, 0, 0
             self.render()
             #self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 print("Found Staircase")
-                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
-                self.__executeMoves(stairMoves)
-                self.render()
-                exit()
+                path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0]))
+                if not path is None:
+                    stairMoves = self.getMoves(path)
+                    try:
+                        self.__executeMoves(stairMoves)
+                    except:
+                        return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+                    self.render()
+                    return True, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
 
     def __executeMoves(self, moves: list):
         start = time()
@@ -86,9 +99,11 @@ class Agent:
                         self.step(m)
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
+                    self.moves += 1
                     break
-                if count > 100:
-                    print("Move not working: {m}")
+                if count > 20:
+                    print(f"Move not working: {m}")
+                    self.render()
                     break
         print(f"Execute Move Time: {time() - start}")
 
@@ -192,14 +207,12 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        start = time()
         obs, *rest = self.env.step(action)
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.visited.add((self.y_pos, self.x_pos))
-        print(f"Step time {time() - start}")
 
     def render(self):
         self.env.render()
@@ -220,7 +233,7 @@ class Agent:
                         if not (x,y) in self.graphNodes:
                             newNodes.append((x, y))
                             self.graphNodes[(x,y)] = GraphNode([], x, y)
-                        heappush(prioQue, (furthestDistanceFromMean(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
+                        heappush(prioQue, (furthestDistanceFromMeanAndClosestToUs(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
 
         # Remove old current location node
         if len(self.locationStack) > 0:
