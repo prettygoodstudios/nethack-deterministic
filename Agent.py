@@ -62,7 +62,9 @@ class Agent:
             try:
                 self.visited.add(path[-1])
                 self.__executeMoves(moves)
-            except:
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except Exception as e:
                 return False, 0, self.moves
             self.render()
             #self.graph.plot(self.map, self, searchPoints=True)
@@ -75,6 +77,8 @@ class Agent:
                     stairMoves = self.getMoves(path)
                     try:
                         self.__executeMoves(stairMoves)
+                    except KeyboardInterrupt:
+                        raise KeyboardInterrupt
                     except:
                         return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
                     self.render()
