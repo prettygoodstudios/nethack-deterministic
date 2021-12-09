@@ -12,7 +12,7 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-from heuristics import furthestDistanceFromMean
+from heuristics import furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
 from main import MoveActions
 from time import time
 from sys import exit
@@ -39,15 +39,20 @@ class Agent:
         self.locationStack = []
         self.graphNodes = {}
 
-    def play(self):
+    def play(self) -> bool:
+        """Plays game returns true if found staircase otherwise false"""
         while True:
             self.buildGraph()
             path = None
             while path is None:
+                if len(self.pQueue) == 0:
+                    return False
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
                 print(f"General Path {path}")
+            if path is None:
+                return False
             moves = self.getMoves(path)
             print(moves)
             self.__executeMoves(moves)
@@ -59,7 +64,7 @@ class Agent:
                 stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
                 self.__executeMoves(stairMoves)
                 self.render()
-                exit()
+                return True
 
     def __executeMoves(self, moves: list):
         start = time()
@@ -87,8 +92,9 @@ class Agent:
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
                     break
-                if count > 100:
-                    print("Move not working: {m}")
+                if count > 20:
+                    print(f"Move not working: {m}")
+                    self.render()
                     break
         print(f"Execute Move Time: {time() - start}")
 
@@ -192,14 +198,12 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        start = time()
         obs, *rest = self.env.step(action)
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.visited.add((self.y_pos, self.x_pos))
-        print(f"Step time {time() - start}")
 
     def render(self):
         self.env.render()
@@ -220,7 +224,7 @@ class Agent:
                         if not (x,y) in self.graphNodes:
                             newNodes.append((x, y))
                             self.graphNodes[(x,y)] = GraphNode([], x, y)
-                        heappush(prioQue, (furthestDistanceFromMean(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
+                        heappush(prioQue, (furthestDistanceFromMeanAndClosestToUs(self, self.graphNodes[(x,y)]), self.graphNodes[(x,y)]))
 
         # Remove old current location node
         if len(self.locationStack) > 0:
