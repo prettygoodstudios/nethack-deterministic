@@ -1,5 +1,6 @@
 from Agent import Agent
 from heuristics import furthestDistanceFromMeanAndClosestToUs
+from sys import exit
 import traceback
 
 if __name__ == "__main__":
@@ -11,6 +12,9 @@ if __name__ == "__main__":
         try:
             agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
             result, optimal, moves = agent.play()
+        except KeyboardInterrupt:
+            f.close()
+            exit(0)
         except Exception as e:
             newLine = "\n"
             result = f'Crashed {traceback.format_exc().replace(newLine, "")}'
