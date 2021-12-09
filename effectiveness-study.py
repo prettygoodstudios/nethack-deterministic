@@ -6,12 +6,14 @@ if __name__ == "__main__":
     f = open("effectiveness.csv", "w")
     print("trial, result",file=f)
     print("trial, result")
-    for i in range(5):
+    for i in range(2):
         try:
             agent = Agent("NetHackScore-v0")
-            result = agent.play()
-        except:
-            result = False
-        print(f"{i},{result}", file=f)
-        print(f"{i},{result}")
+            result, optimal, moves = agent.play()
+        except Exception as e:
+            result = f'Crashed {e}'
+            optimal = 0
+            moves = 0
+        print(f"{i},{result},{optimal},{moves}", file=f)
+        print(f"{i},{result},{optimal},{moves}")
     f.close()

@@ -27,6 +27,7 @@ class Agent:
     map = None
     heatmap_graph = None
     pQueue = None
+
     def __init__(self, type):
         self.env = gym.make(type)
         obs = self.env.reset()
@@ -34,10 +35,12 @@ class Agent:
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
+        self.start = (self.x_pos, self.y_pos)
         self.heatmap_graph = GraphBuilder(["heat_pos"])
         self.visited = set()
         self.locationStack = []
         self.graphNodes = {}
+        self.moves = 0
 
     def play(self) -> bool:
         """Plays game returns true if found staircase otherwise false"""
@@ -45,26 +48,31 @@ class Agent:
             self.buildGraph()
             path = None
             while path is None:
-                if len(self.pQueue) == 0:
-                    return False
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
                 print(f"General Path {path}")
-            if path is None:
-                return False
             moves = self.getMoves(path)
             print(moves)
-            self.__executeMoves(moves)
+            try:
+                self.visited.add(path[-1])
+                self.__executeMoves(moves)
+            except:
+                return False, 0, 0
             self.render()
             #self.graph.plot(self.map, self)
             stairLocation = self.map.findStairs()
             if stairLocation is not None:
                 print("Found Staircase")
-                stairMoves = self.getMoves(findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0])))
-                self.__executeMoves(stairMoves)
-                self.render()
-                return True
+                path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0]))
+                if not path is None:
+                    stairMoves = self.getMoves(path)
+                    try:
+                        self.__executeMoves(stairMoves)
+                    except:
+                        return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+                    self.render()
+                    return True, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
 
     def __executeMoves(self, moves: list):
         start = time()
@@ -91,6 +99,7 @@ class Agent:
                         self.step(m)
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
+                    self.moves += 1
                     break
                 if count > 20:
                     print(f"Move not working: {m}")
