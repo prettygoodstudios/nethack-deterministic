@@ -52,8 +52,7 @@ class Agent:
             path = None
             while path is None:
                 if len(self.pQueue) == 0:
-                    # Breaks glass
-                    pass
+                    self.__breakGlass()
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
@@ -80,6 +79,9 @@ class Agent:
                         return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
                     self.render()
                     return True, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+
+    def __breakGlass(self):
+        """Emergency algo"""
 
     def __executeMoves(self, moves: list):
         start = time()
