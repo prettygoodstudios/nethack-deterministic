@@ -53,6 +53,7 @@ class Agent:
             while path is None:
                 if len(self.pQueue) == 0:
                     # Breaks glass
+                    pass
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
