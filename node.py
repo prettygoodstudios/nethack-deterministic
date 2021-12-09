@@ -71,7 +71,7 @@ class GraphNode():
         for edge in removeEdges:
             self.edges.remove(edge)
 
-    def plot(self, map: PathFindingMap, agent) -> str:
+    def plot(self, map: PathFindingMap, agent, searchPoints=False) -> str:
         """Plots graph using matplotlib"""
         traversedEdges = set()
         yVals = range(0, map.getEnviromentDimensions()[0])
@@ -83,19 +83,26 @@ class GraphNode():
         axes = plt.axes()
         for y in yVals:
             for x in xVals:
-                if map.isWall(y,x):
-                    rect = patches.Rectangle((x,y), 1,1)
-                    axes.add_patch(rect)
-                if map.isNewRoute(agent,y,x):
-                    rect = patches.Rectangle((x,y), 1,1, facecolor='g')
-                    axes.add_patch(rect)
-                if map.isPet(y, x):
-                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
-                    axes.add_patch(rect)
-                #if map.isDoor(y,x):
-                #    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
-                #    axes.add_patch(rect)
-                
+                if(searchPoints):
+                    if map.isWall(y,x):
+                        rect = patches.Rectangle((x,y), 1,1)
+                        axes.add_patch(rect)
+                    if map.isSearchPoint(y,x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                        axes.add_patch(rect)
+                else:
+                    if map.isWall(y,x):
+                        rect = patches.Rectangle((x,y), 1,1)
+                        axes.add_patch(rect)
+                    if map.isNewRoute(agent,y,x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                        axes.add_patch(rect)
+                    if map.isPet(y, x):
+                        rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                        axes.add_patch(rect)
+                    #if map.isDoor(y,x):
+                    #    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    #    axes.add_patch(rect) 
 
         # Traverse and draw the nodes and edges
         def traverse(node: GraphNode):
@@ -115,4 +122,5 @@ class GraphNode():
         traverse(self)
         plt.axis('scaled')
         plt.gca().invert_yaxis()
-        plt.savefig(f"images/plot-{time()}.png", dpi=300)
+        plt.show()
+        # plt.savefig(f"images/plot-{time()}.png", dpi=300)

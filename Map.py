@@ -23,7 +23,7 @@ class Map:
         if y > 0:
             isNew = isNew or self.map[y-1][x] == 32
         if y < y_bound:
-            isNew = isNew or self.map[y-1][x] == 32
+            isNew = isNew or self.map[y+1][x] == 32
         if x > 0:
             isNew = isNew or self.map[y][x-1] == 32
         if x < x_bound:
@@ -37,20 +37,40 @@ class Map:
         if y < y_bound and x > 0:
             isNew = isNew or self.map[y+1][x-1] == 32
         return isNew
-            #if(y == 0 and x == 0):
-            #    return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
-            #elif(y == y_bound and x == x_bound):
-            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32)
-            #elif(y == 0):
-            #    return (self.map[y+1][x] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32 or self.map[y+1][x-1] != 32 or self.map[y][x-1] != 32)
-            #elif(x == 0):
-            #    return (self.map[y][x+1] != 32 or self.map[y+1][x] != 32 or self.map[y+1][x+1] != 32 or self.map[y-1][x+1] != 32 or self.map[y-1][x] != 32)
-            #elif(y == y_bound):
-            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32)
-            #elif(x == x_bound):
-            #    return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32)
-            #return (self.map[y-1][x-1] != 32 or self.map[y][x-1] != 32 or self.map[y+1][x-1] != 32 or self.map[y-1][x] != 32 or self.map[y+1][x] != 32 or self.map[y-1][x+1] != 32 or self.map[y][x+1] != 32 or self.map[y+1][x+1] != 32)
-        
+ 
+    def isSearchPoint(self, y, x):
+        y_bound = self.getEnviromentDimensions()[0]-1
+        x_bound = self.getEnviromentDimensions()[1]-1
+        if self.isWall(y, x):
+            return False
+        isNew = False
+        if y > 0:
+            isNew = isNew or self.map[y-1][x] == 32 or self.isWall(y-1, x)
+        if y < y_bound:
+            isNew = isNew or self.map[y+1][x] == 32 or self.isWall(y+1, x)
+        if x > 0:
+            isNew = isNew or self.map[y][x-1] == 32 or self.isWall(y, x-1)
+        if x < x_bound:
+            isNew = isNew or self.map[y][x+1] == 32 or self.isWall(y, x+1)
+        if y > 0 and x > 0:
+            isNew = isNew or self.map[y-1][x-1] == 32 or self.isWall(y-1, x-1)
+        if y > 0 and x < x_bound:
+            isNew = isNew or self.map[y-1][x+1] == 32 or self.isWall(y-1, x+1)
+        if y < y_bound and x < x_bound:
+            isNew = isNew or self.map[y+1][x+1] == 32 or self.isWall(y+1, x+1)
+        if y < y_bound and x > 0:
+            isNew = isNew or self.map[y+1][x-1] == 32 or self.isWall(y+1, x-1)
+        return isNew and not self.isWall(y,x)
+
+    def identifySearchPoints(self):
+        y_bound = self.getEnviromentDimensions()[0]
+        x_bound = self.getEnviromentDimensions()[1]
+        points = []
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if(self.isSearchPoint(y, x)):
+                    points.append((y, x))
+        return points
 
     def isDoor(self, y, x):
         if (y,x) in self.doors:
@@ -110,6 +130,17 @@ class Map:
                 if self.isDoor(y,x):
                     self.doors.add((y,x))
 
+    def findStairs(self):
+        y_bound, x_bound = self.map.shape
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if(self.map[y][x] == 62):
+                    return (y, x)
+        return None
 
-
-    
+    def __updateDoors(self):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
+                if self.isDoor(y,x):
+                    self.doors.add((y,x))
+   

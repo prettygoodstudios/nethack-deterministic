@@ -4,8 +4,8 @@ from Agent import Agent
 if __name__ == "__main__":
     # Let's try and play
     f = open("effectiveness.csv", "w")
-    print("trial, result",file=f)
-    print("trial, result")
+    print("trial, result, optimal, taken",file=f)
+    print("trial, result, optimal, taken")
     for i in range(2):
         try:
             agent = Agent("NetHackScore-v0")
