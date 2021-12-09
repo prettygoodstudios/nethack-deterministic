@@ -1,6 +1,6 @@
 from Agent import Agent
 from heuristics import furthestDistanceFromMeanAndClosestToUs
-from sys import exit
+from sys import exit, argv
 import traceback
 
 if __name__ == "__main__":
@@ -8,7 +8,8 @@ if __name__ == "__main__":
     f = open("effectiveness.csv", "w")
     print("trial, result, optimal, taken",file=f)
     print("trial, result, optimal, taken")
-    for i in range(2):
+    # First argument is nuber of trials to run
+    for i in range(int(argv[1])):
         try:
             agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
             result, optimal, moves = agent.play()
