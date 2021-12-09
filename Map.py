@@ -130,6 +130,17 @@ class Map:
                 if self.isDoor(y,x):
                     self.doors.add((y,x))
 
+    def findStairs(self):
+        y_bound, x_bound = self.map.shape
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if(self.map[y][x] == 62):
+                    return (y, x)
+        return None
 
-
-    
+    def __updateDoors(self):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
+                if self.isDoor(y,x):
+                    self.doors.add((y,x))
+   
