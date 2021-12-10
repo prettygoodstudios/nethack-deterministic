@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from time import time
+
 
 class GraphBuilder:
     """Builder to store data points and build graphs
@@ -111,7 +113,7 @@ class GraphBuilder:
     def save_graphs(self, loc=""):
         for key in self.graphs_data:
             data = self._prep_data(key, transpose=True)
-            path = loc + ("./%s.png" % key)
+            path = f"images/{key}-{time()}.png"
             plt.imsave(fname=path, arr=data, cmap='coolwarm')
 
 def main():

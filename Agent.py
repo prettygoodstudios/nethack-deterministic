@@ -73,6 +73,7 @@ class Agent:
                 print("Found Staircase")
                 path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (stairLocation[1], stairLocation[0]))
                 if not path is None:
+                    self.heatmap_graph.save_graphs()
                     self.heuristic = closestToStairCase
                     stairMoves = self.getMoves(path)
                     try:
@@ -110,6 +111,8 @@ class Agent:
                             self.step(m)
                     else:
                         self.step(m)
+                        self.heatmap_graph.append_point("heat_pos", (self.getX(), self.getY()))
+
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
                     self.moves += 1
