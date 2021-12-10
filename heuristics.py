@@ -22,10 +22,10 @@ def closestToStairCase(a, n):
     pNode = [n.x, n.y]
     pAgent = [stairs[1], stairs[0]]
     distance = math.sqrt( ((pNode[0]-pAgent[0])**2)+((pNode[1]-pAgent[1])**2) )
-    return -distance
+    return distance
 
 def closestToAgent(a, n):
     pNode = [n.x, n.y]
     pAgent = [a.x_pos, a.y_pos]
     distance = math.sqrt( ((pNode[0]-pAgent[0])**2)+((pNode[1]-pAgent[1])**2) )
-    return -distance
+    return distance
