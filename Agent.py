@@ -18,6 +18,7 @@ from time import time
 from sys import exit
 from matplotlib import pyplot as plt
 from matplotlib import patches
+import traceback
 
 from astar import Node
 
@@ -65,6 +66,7 @@ class Agent:
             except KeyboardInterrupt:
                 raise KeyboardInterrupt
             except Exception as e:
+                print(traceback.format_exc())
                 return False, 0, self.moves
             self.render()
             #self.graph.plot(self.map, self, searchPoints=True)
