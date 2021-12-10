@@ -97,8 +97,8 @@ class Agent:
                 print(f"Break path{path}")
             moves = self.getMoves(path)
             self.__executeMoves(moves)
-            for _ in range(10):
-                self.step(19)
+            for _ in range(3):
+                self.step(22)
             self.render()
             height, width = self.map.getEnviromentDimensions()
             for x in range(max(0, self.x_pos-1), min(width, self.x_pos+1)):
