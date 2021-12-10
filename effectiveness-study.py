@@ -6,7 +6,11 @@ import traceback
 
 if __name__ == "__main__":
     # Let's try and play
-    f = open("effectiveness.csv", "w")
+    if len(argv) > 2:
+        fileName = argv[2]
+    else:
+        fileName = "effectiveness.csv"
+    f = open(fileName, "w")
     print("trial, result, optimal, taken",file=f)
     print("trial, result, optimal, taken")
     # First argument is nuber of trials to run
