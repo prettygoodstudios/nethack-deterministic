@@ -45,6 +45,7 @@ class Agent:
         self.graphNodes = {}
         self.moves = 0
         self.heuristic = heuristic
+        self.done = False
 
     def play(self) -> bool:
         """Plays game returns true if found staircase otherwise false"""
@@ -53,20 +54,17 @@ class Agent:
             path = None
             while path is None:
                 if len(self.pQueue) == 0:
-                    self.__breakGlass()
+                    if not self.__breakGlass():
+                        return False, 0, self.moves
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
                 print(f"General Path {path}")
             moves = self.getMoves(path)
             print(moves)
-            try:
-                self.visited.add(path[-1])
-                self.__executeMoves(moves)
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-            except Exception as e:
-                print(traceback.format_exc())
+            self.visited.add(path[-1])
+            self.__executeMoves(moves)
+            if self.done:
                 return False, 0, self.moves
             self.render()
             #self.graph.plot(self.map, self, searchPoints=True)
@@ -78,12 +76,7 @@ class Agent:
                     #self.heatmap_graph.save_graphs()
                     self.heuristic = closestToStairCase
                     stairMoves = self.getMoves(path)
-                    try:
-                        self.__executeMoves(stairMoves)
-                    except KeyboardInterrupt:
-                        raise KeyboardInterrupt
-                    except:
-                        return False, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
+                    self.__executeMoves(stairMoves)
                     self.render()
                     return True, len(findPathInGridWorld(self.map, self.start, (stairLocation[1], stairLocation[0]))), self.moves
 
@@ -95,6 +88,9 @@ class Agent:
         while len(queue) > 0:
             path = None
             while path is None:
+                if len(queue) == 0:
+                    self.__breakGlass()
+                    return True
                 _, destination = heappop(queue)
                 path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), tuple(reversed(destination)))
                 print(f"Break path{path}")
@@ -102,13 +98,15 @@ class Agent:
             self.__executeMoves(moves)
             for _ in range(3):
                 self.step(22)
+            if self.done:
+                return False
             self.render()
             height, width = self.map.getEnviromentDimensions()
             for x in range(max(0, self.x_pos-1), min(width, self.x_pos+1)):
                 for y in range(max(0, self.y_pos-1), min(height, self.y_pos+1)):
                     if self.map.isNewRoute(self, y, x):
                         self.buildGraph()
-                        return
+                        return True
 
 
     def __executeMoves(self, moves: list):
@@ -245,13 +243,15 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        obs, *rest = self.env.step(action)
-        self.map.update(obs)
-        blstats = [_ for _ in obs["blstats"]]
-        self.score = blstats[9]
-        self.moves = blstats[20]
-        self.x_pos, self.y_pos = blstats[0], blstats[1]
-        self.visited.add((self.y_pos, self.x_pos))
+        if not self.done:
+            obs, reward, done, *rest = self.env.step(action)
+            self.map.update(obs)
+            self.done = done
+            blstats = [_ for _ in obs["blstats"]]
+            self.score = blstats[9]
+            self.moves = blstats[20]
+            self.x_pos, self.y_pos = blstats[0], blstats[1]
+            self.visited.add((self.y_pos, self.x_pos))
 
     def render(self):
         self.env.render()
