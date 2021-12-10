@@ -137,7 +137,6 @@ class Agent:
 
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
-                    self.moves += 1
                     self.heatmap_graph.append_point("heat_pos", (self.getX(), self.getY()))
                     break
                 if count > 20:
@@ -250,6 +249,7 @@ class Agent:
         self.map.update(obs)
         blstats = [_ for _ in obs["blstats"]]
         self.score = blstats[9]
+        self.moves = blstats[20]
         self.x_pos, self.y_pos = blstats[0], blstats[1]
         self.visited.add((self.y_pos, self.x_pos))
 
