@@ -72,34 +72,50 @@ class Map:
                     points.append((y, x))
         return points
 
+    def checkIfInBounds(self, y, x):
+        height, width = self.getEnviromentDimensions()
+        if y >= height:
+            return False 
+        if x >= width:
+            return False
+        if y < 0:
+            return False 
+        if x < 0:
+            return False
+        return True
+
     def isDoor(self, y, x):
-        if (y,x) in self.doors:
-            return True
-        if(self.map[y][x] == 124 or self.map[y][x] == 45):
-            if(self.colors[y][x] != 7): #Checks if not a door
+        if self.checkIfInBounds(y,x):
+            if (y,x) in self.doors:
                 return True
-        if(self.map[y][x] == 43):
-            return True
-        if(y > 0 and y < self.getEnviromentDimensions()[0]-1) and x > 0 and x < self.getEnviromentDimensions()[1]-1:
-            if(self.map[y][x] != 124 or self.map[y][x] != 45):
-                if((self.map[y-1][x] == 124 or self.map[y-1][x] == 45) and (self.map[y+1][x] == 124 or self.map[y+1][x] == 45) and (self.map[y][x-1] == 32 or self.map[y][x+1] == 32) and self.isNotWall(y, x)):
+            if(self.map[y][x] == 124 or self.map[y][x] == 45):
+                if(self.colors[y][x] != 7): #Checks if not a door
                     return True
-                elif((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and (self.map[y-1][x] == 32 or self.map[y+1][x] == 32) and self.isNotWall(y, x)):
-                    return True
+            if(self.map[y][x] == 43):
+                return True
+            if(y > 0 and y < self.getEnviromentDimensions()[0]-1) and x > 0 and x < self.getEnviromentDimensions()[1]-1:
+                if(self.map[y][x] != 124 or self.map[y][x] != 45):
+                    if((self.map[y-1][x] == 124 or self.map[y-1][x] == 45) and (self.map[y+1][x] == 124 or self.map[y+1][x] == 45) and (self.map[y][x-1] == 32 or self.map[y][x+1] == 32) and self.isNotWall(y, x)):
+                        return True
+                    elif((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and (self.map[y-1][x] == 32 or self.map[y+1][x] == 32) and self.isNotWall(y, x)):
+                        return True
         return False
 
     def isPet(self, y, x):
         return self.map[y][x] in set([102, 100, 117])
     
     def isInRoom(self, y, x):
-        if(self.map[y][x] == 46):
-            return True
+        if self.checkIfInBounds(y,x):
+            if(self.map[y][x] == 46):
+                return True
         return False
 
     def getEnviromentDimensions(self):
         return (len(self.map), len(self.map[0]))
 
     def isNotWall(self, y, x, diagonal=False): #Treats boulders as walls
+        if not self.checkIfInBounds(y,x):
+            return False
         if(self.map[y][x] == 96 or self.map[y][x] == 32):
             return False
         if(self.map[y][x] == 124 or self.map[y][x] == 45):
@@ -110,6 +126,8 @@ class Map:
         return True
 
     def isWall(self, y, x, diagonal=False):
+        if not self.checkIfInBounds(y,x):
+            return False
         return not self.isNotWall(y, x, diagonal)
 
     def update(self, obs):
@@ -129,14 +147,6 @@ class Map:
             for x in range(len(self.map[0])):
                 if self.isDoor(y,x):
                     self.doors.add((y,x))
-
-    def findStairs(self):
-        y_bound, x_bound = self.map.shape
-        for y in range(y_bound):
-            for x in range(x_bound):
-                if(self.map[y][x] == 62):
-                    return (y, x)
-        return None
 
     def __updateDoors(self):
         for y in range(len(self.map)):

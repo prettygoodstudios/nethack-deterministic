@@ -1,4 +1,6 @@
 import sys
+
+from heuristics import furthestDistanceFromMeanAndClosestToUs
 sys.path.append("..")
 from Agent import Agent
 from astar import MockMap, findPathInGridWorld, renderTestData
@@ -49,14 +51,14 @@ if __name__ == "__main__":
             [Space.VERTICAL_WALL.value] + [0 for _ in range(5)] + [Space.VERTICAL_WALL.value] + [0 for _ in range(2)] + [Space.VERTICAL_WALL.value],
             [Space.HORIZONTAL_WALL.value for _ in range(10)],
         ]
-        mockTwo = MockMap(testData2)  
+        mockTwo = MockMap(testData2)
 
         renderTestData(testData2, set(findPathInGridWorld(mockTwo, (1, 8), (8, 8))))
         renderTestData(testData2, set(findPathInGridWorld(mockTwo, (1, 1), (8, 8))))
         renderTestData(testData2, set(findPathInGridWorld(mockTwo, (2, 5), (8, 8))))
     else:
         # If test flag not provided run with actual agent
-        agent = Agent("NetHackScore-v0")
+        agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
         result = findPathInGridWorld(agent.map, (agent.getX(), agent.getY()), (8, 8))
         agent.logPath(result)
         agent.heatmap_graph.save_graphs()

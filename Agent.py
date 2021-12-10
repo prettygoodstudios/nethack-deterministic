@@ -87,6 +87,27 @@ class Agent:
 
     def __breakGlass(self):
         """Emergency algo"""
+        queue = list(map(lambda x: (0, x), self.map.identifySearchPoints()))
+        heapify(queue)
+ 
+        while len(queue) > 0:
+            path = None
+            while path is None:
+                _, destination = heappop(queue)
+                path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), tuple(reversed(destination)))
+                print(f"Break path{path}")
+            moves = self.getMoves(path)
+            self.__executeMoves(moves)
+            for _ in range(3):
+                self.step(22)
+            self.render()
+            height, width = self.map.getEnviromentDimensions()
+            for x in range(max(0, self.x_pos-1), min(width, self.x_pos+1)):
+                for y in range(max(0, self.y_pos-1), min(height, self.y_pos+1)):
+                    if self.map.isNewRoute(self, y, x):
+                        self.buildGraph()
+                        return
+
 
     def __executeMoves(self, moves: list):
         start = time()
@@ -254,19 +275,20 @@ class Agent:
         # Remove old current location node
         if len(self.locationStack) > 0:
             ourLocation = self.locationStack[-1]
-            if not self.map.isDoor(ourLocation[1], ourLocation[0]):
+            if (self.x_pos, self.y_pos) != ourLocation and not self.map.isDoor(ourLocation[1], ourLocation[0]):
                 del self.graphNodes[ourLocation]
                 for door in self.graphNodes:
                     self.graphNodes[door].removeEdge(ourLocation)
 
         # Add new current location node edges
-        for door in self.graphNodes:
-            ourLocation = (self.x_pos,self.y_pos)
-            if door != ourLocation:
-                path = findPathInGridWorld(self.map, ourLocation, door, ignoreDoors=False)
-                if not path is None:
-                    self.graphNodes[ourLocation].addEdge(GraphEdge(self.graphNodes[ourLocation], self.graphNodes[door], path))
-                    self.graphNodes[door].addEdge(GraphEdge(self.graphNodes[door], self.graphNodes[ourLocation], list(reversed(path))))
+        ourLocation = (self.x_pos,self.y_pos)
+        if (self.x_pos, self.y_pos) != ourLocation:
+            for door in self.graphNodes:
+                if door != ourLocation:
+                    path = findPathInGridWorld(self.map, ourLocation, door, ignoreDoors=False)
+                    if not path is None:
+                        self.graphNodes[ourLocation].addEdge(GraphEdge(self.graphNodes[ourLocation], self.graphNodes[door], path))
+                        self.graphNodes[door].addEdge(GraphEdge(self.graphNodes[door], self.graphNodes[ourLocation], list(reversed(path))))
 
         # Add edges to new nodes
         tried = set()

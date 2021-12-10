@@ -1,1 +1,21 @@
 trial, result, optimal, taken
+0,True,18,56
+1,Crashed Traceback (most recent call last):  File "/Users/mrust/Documents/nethack-deterministic/effectiveness-study.py", line 16, in <module>    result, optimal, moves = agent.play()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 55, in play    self.__breakGlass()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 95, in __breakGlass    _, destination = heappop(queue)IndexError: index out of range,0,0
+2,Crashed Traceback (most recent call last):  File "/Users/mrust/Documents/nethack-deterministic/effectiveness-study.py", line 16, in <module>    result, optimal, moves = agent.play()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 55, in play    self.__breakGlass()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 95, in __breakGlass    _, destination = heappop(queue)IndexError: index out of range,0,0
+3,False,0,13
+4,True,22,21
+5,Crashed Traceback (most recent call last):  File "/Users/mrust/Documents/nethack-deterministic/effectiveness-study.py", line 16, in <module>    result, optimal, moves = agent.play()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 55, in play    self.__breakGlass()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 95, in __breakGlass    _, destination = heappop(queue)IndexError: index out of range,0,0
+6,Crashed Traceback (most recent call last):  File "/Users/mrust/Documents/nethack-deterministic/effectiveness-study.py", line 16, in <module>    result, optimal, moves = agent.play()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 55, in play    self.__breakGlass()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 103, in __breakGlass    if self.map.isNewRoute(y, x):TypeError: isNewRoute() missing 1 required positional argument: 'x',0,0
+7,Crashed Traceback (most recent call last):  File "/Users/mrust/Documents/nethack-deterministic/effectiveness-study.py", line 16, in <module>    result, optimal, moves = agent.play()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 55, in play    self.__breakGlass()  File "/Users/mrust/Documents/nethack-deterministic/Agent.py", line 103, in __breakGlass    if self.map.isNewRoute(y, x):TypeError: isNewRoute() missing 1 required positional argument: 'x',0,0
+8,True,58,70
+9,True,17,22
+10,False,0,48
+11,False,0,111
+12,False,0,44
+13,True,76,166
+14,True,15,16
+15,False,0,26
+16,True,41,62
+17,False,0,31
+18,False,0,4
+19,False,0,28

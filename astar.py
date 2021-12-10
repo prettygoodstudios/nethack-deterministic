@@ -10,10 +10,11 @@ class Node:
     __position: tuple
     __cost: float
 
-    def __init__(self, position: tuple, cost: float, parent) -> None:
+    def __init__(self, position: tuple, goal: tuple, cost: float, parent) -> None:
         self.__position = position 
         self.__cost = cost
         self.__parent = parent
+        self.__goal = goal
 
     def updateCost(self, cost, parent) -> None:
         if cost < self.__cost:
@@ -21,7 +22,7 @@ class Node:
             self.__parent = parent
 
     def getCost(self) -> float:
-        return self.__cost
+        return self.__cost + ((self.__position[0] - self.__goal[0]) ** 2 + (self.__position[1] - self.__goal[1]) ** 2) ** 0.5
 
     def getPosition(self) -> tuple:
         return self.__position
@@ -74,7 +75,7 @@ def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
         MoveActions.DOWN_RIGHT: (1, 1),
         MoveActions.UP_LEFT: (-1, -1)
     }
-    openSet = {start: Node(start, 0, None)}
+    openSet = {start: Node(start, goal, 0, None)}
     openQueue = [openSet[k] for k in openSet]
     closedSet = {}
     height, width = map.getEnviromentDimensions()
@@ -101,7 +102,7 @@ def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
                     if (newX, newY) in openSet:
                         openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
                     else:
-                        openSet[(newX, newY)] = Node((newX, newY), current.getCost() +1, current)
+                        openSet[(newX, newY)] = Node((newX, newY), goal, current.getCost() +1, current)
                         heappush(openQueue, openSet[(newX, newY)])
     return None
 
