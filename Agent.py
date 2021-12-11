@@ -12,7 +12,7 @@ from Map import Map
 from astar import findPathInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
-from heuristics import closestToStairCase, furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
+from heuristics import closestToAgent, closestToStairCase, furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
 from main import MoveActions
 from time import time
 from sys import exit
@@ -385,8 +385,49 @@ class Agent:
                     axes.add_patch(rect)
         plt.show()
 
+    def plotOptimalAndPathTaken(self):
+        height, width = self.map.getEnviromentDimensions()
+        axes = plt.axes()
+
+        for y in range(height):
+            for x in range(width):
+                if self.map.isWall(y,x):
+                    rect = patches.Rectangle((x,y), 1,1)
+                    axes.add_patch(rect)
+                if (x,y) == self.start:
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
+                    axes.add_patch(rect)
+                    plt.annotate(f"Start", (x,y))
+                if (x,y) == (self.x_pos, self.y_pos):
+                    rect = patches.Rectangle((x,y), 1,1, facecolor='g')
+                    axes.add_patch(rect)
+                    plt.annotate(f"Staircase", (x,y))
+
+        optimal = findPathInGridWorld(self.map, self.start, (self.x_pos, self.y_pos))
+        optimalX = [x + 0.5 for x,y in optimal]
+        optimalY = [y + 0.5 for x,y in optimal]
+        plt.plot(optimalY, optimalX, color='green', label='Optimal Path')
+        currX, currY = self.start
+        actualX = []
+        actualY = []
+        for i, movement in enumerate(self.locationStack[1:]+[(self.x_pos, self.y_pos)]):
+            offset = 0 if i == 0 else 1
+            actualSegment = findPathInGridWorld(self.map, (currX, currY), movement)
+            actualX += [x + 0.5 for x,y in actualSegment][offset:]
+            actualY += [y + 0.5 for x,y in actualSegment][offset:] 
+            currX, currY = movement
+
+        plt.plot(actualY, actualX, color='red', label='Actual Path')
+        
+        plt.axis('scaled')
+        plt.gca().invert_yaxis()
+        plt.legend()
+        plt.show()
+
+        
+
 if __name__ == "__main__":
-    agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
+    agent = Agent("NetHackScore-v0", closestToAgent)
 
     # Let's try and play
     print(f"Result: {agent.play()}")
