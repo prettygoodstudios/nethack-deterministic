@@ -45,7 +45,6 @@ class Agent:
         self.graphNodes = {}
         self.moves = 0
         self.heuristic = heuristic
-        self.done = False
 
     def play(self) -> bool:
         """Plays game returns true if found staircase otherwise false"""
@@ -57,7 +56,7 @@ class Agent:
             while path is None:
                 if len(self.pQueue) == 0:
                     if not self.__breakGlass():
-                        return False, 0, self.moves
+                        return "Dead", 0, self.moves
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
                 path = self.generalGraphAStar(self.graph, destination, None)
@@ -66,8 +65,6 @@ class Agent:
             print(moves)
             self.visited.add(path[-1])
             self.__executeMoves(moves)
-            if self.done:
-                return False, 0, self.moves
             self.render()
             #self.graph.plot(self.map, self, searchPoints=True)
             stairLocation = self.map.findStairs()
@@ -100,7 +97,7 @@ class Agent:
             self.__executeMoves(moves)
             for _ in range(3):
                 self.step(22)
-            if self.done:
+            if self.map.isDead():
                 return False
             self.render()
             height, width = self.map.getEnviromentDimensions()
@@ -128,12 +125,13 @@ class Agent:
             count = 0
             while True:
                 for i, m in enumerate(move):
-                    if m == 20:
-                        dx, dy = actionDirection[move[i+1]]
-                        if not self.map.isPet(self.getY()+dy, self.getX()+dx):
+                    if not self.map.isDead():
+                        if m == 20:
+                            dx, dy = actionDirection[move[i+1]]
+                            if not self.map.isPet(self.getY()+dy, self.getX()+dx):
+                                self.step(m)
+                        else:
                             self.step(m)
-                    else:
-                        self.step(m)
 
                 count += 1
                 if (startX, startY) != (self.getX(), self.getY()):
@@ -246,9 +244,8 @@ class Agent:
 
     def step(self, action):
         if not self.done:
-            obs, reward, done, *rest = self.env.step(action)
+            obs, reward, *rest = self.env.step(action)
             self.map.update(obs)
-            self.done = done
             blstats = [_ for _ in obs["blstats"]]
             self.score = blstats[9]
             self.moves = blstats[20]
@@ -392,4 +389,4 @@ if __name__ == "__main__":
     agent = Agent("NetHackScore-v0", furthestDistanceFromMeanAndClosestToUs)
 
     # Let's try and play
-    agent.play()
+    print(f"Result: {agent.play()}")
