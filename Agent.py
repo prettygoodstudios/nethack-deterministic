@@ -50,6 +50,8 @@ class Agent:
     def play(self) -> bool:
         """Plays game returns true if found staircase otherwise false"""
         while True:
+            if self.map.isDead():
+                return "Dead", 0, self.moves
             self.buildGraph()
             path = None
             while path is None:

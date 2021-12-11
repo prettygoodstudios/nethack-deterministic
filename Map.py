@@ -154,3 +154,8 @@ class Map:
                 if self.isDoor(y,x):
                     self.doors.add((y,x))
    
+    def isDead(self):
+        blstats = [_ for _ in self.obs["blstats"]]
+        if blstats[10] > 0:
+            return False
+        return True
