@@ -243,7 +243,7 @@ class Agent:
         return possibleSteps, coords
 
     def step(self, action):
-        if not self.done:
+        if not self.map.isDead():
             obs, reward, *rest = self.env.step(action)
             self.map.update(obs)
             blstats = [_ for _ in obs["blstats"]]
