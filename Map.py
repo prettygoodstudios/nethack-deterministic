@@ -20,6 +20,8 @@ class Map:
         if (y, x) in a.visited or self.isWall(y,x):
             return False
         isNew = False
+        #if self.isDoor(y,x):
+        #    return True
         if y > 0:
             isNew = isNew or self.map[y-1][x] == 32
         if y < y_bound:
@@ -113,8 +115,13 @@ class Map:
     def getEnviromentDimensions(self):
         return (len(self.map), len(self.map[0]))
 
+    def isIronBars(self, y, x):
+        return self.colors[y][x] == 6 and self.map[y][x] == 35
+
     def isNotWall(self, y, x, diagonal=False): #Treats boulders as walls
         if not self.checkIfInBounds(y,x):
+            return False
+        if (self.isIronBars(y, x)):
             return False
         if(self.map[y][x] == 96 or self.map[y][x] == 32):
             return False

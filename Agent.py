@@ -9,13 +9,14 @@ from heapq import heapify, heappush, heappop
 from dataclasses import dataclass, field
 from typing import Any
 from Map import Map
-from astar import findPathInGridWorld
+from random import randint
+from astar import findPathInGridWorld, findPathUsingFloodSearch, floodSearchInGridWorld
 from node import GraphEdge, GraphNode
 from utils.graphs import GraphBuilder
 from heuristics import closestToAgent, closestToStairCase, furthestDistanceFromMean, furthestDistanceFromMeanAndClosestToUs
 from main import MoveActions
 from time import time
-from sys import exit
+from sys import argv
 from matplotlib import pyplot as plt
 from matplotlib import patches
 import traceback
@@ -31,8 +32,9 @@ class Agent:
     heatmap_graph = None
     pQueue = None
 
-    def __init__(self, type, heuristic):
+    def __init__(self, type, heuristic, seed=None):
         self.env = gym.make(type)
+        self.seed, *rest = self.env.seed(seed)
         obs = self.env.reset()
         self.map = Map(self.env, obs)
         blstats = [_ for _ in obs["blstats"]]
@@ -59,8 +61,10 @@ class Agent:
                         return "Dead", 0, self.moves
                 _, destination = heappop(self.pQueue)
                 print(f"{self.graph.x},{self.graph.y} -> {destination.x},{destination.y}")
-                path = self.generalGraphAStar(self.graph, destination, None)
+                path = self.generalGraphAStar(self.graph, destination, None) 
                 print(f"General Path {path}")
+                if path is None:
+                    path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), (destination.x, destination.y))
             moves = self.getMoves(path)
             print(moves)
             self.visited.add(path[-1])
@@ -81,16 +85,17 @@ class Agent:
 
     def __breakGlass(self):
         """Emergency algo"""
-        queue = list(map(lambda x: (0, x), self.map.identifySearchPoints()))
-        heapify(queue)
- 
+        sorter = lambda x: (self.y_pos - x[0]) ** 2 + (self.x_pos - x[1]) ** 2
+        queue = sorted(self.map.identifySearchPoints(), key=sorter)
         while len(queue) > 0:
+            if self.map.isDead():
+                return False
             path = None
             while path is None:
                 if len(queue) == 0:
-                    self.__breakGlass()
-                    return True
-                _, destination = heappop(queue)
+                    return self.__breakGlass()
+                queue.sort(key=sorter)
+                destination = queue.pop(0)
                 path = findPathInGridWorld(self.map, (self.x_pos, self.y_pos), tuple(reversed(destination)))
                 print(f"Break path{path}")
             moves = self.getMoves(path)
@@ -101,11 +106,12 @@ class Agent:
                 return False
             self.render()
             height, width = self.map.getEnviromentDimensions()
-            for x in range(max(0, self.x_pos-1), min(width, self.x_pos+1)):
-                for y in range(max(0, self.y_pos-1), min(height, self.y_pos+1)):
+            for x in range(0, width):
+                for y in range(0, height):
                     if self.map.isNewRoute(self, y, x):
                         self.buildGraph()
                         return True
+        return self.__breakGlass()
 
 
     def __executeMoves(self, moves: list):
@@ -130,6 +136,9 @@ class Agent:
                             dx, dy = actionDirection[move[i+1]]
                             if not self.map.isPet(self.getY()+dy, self.getX()+dx):
                                 self.step(m)
+                            else:
+                                self.step(move[i+1])
+                                break
                         else:
                             self.step(m)
 
@@ -294,12 +303,13 @@ class Agent:
         # Add edges to new nodes
         tried = set()
         for i1, door1 in enumerate(newNodes):
+            closedSet = floodSearchInGridWorld(self.map, door1, ignoreDoors=False)
             for i2, door2 in enumerate(self.graphNodes):
                 cacheKey = tuple(sorted([door1, door2]))
                 if door1 != door2:
                     if not cacheKey in tried:
                         tried.add(cacheKey)
-                        path = findPathInGridWorld(self.map, door1, door2, ignoreDoors=False)
+                        path = findPathUsingFloodSearch(closedSet, door2)
                         if not path is None:
                             self.graphNodes[door1].addEdge(GraphEdge(self.graphNodes[door1], self.graphNodes[door2], path))
                             self.graphNodes[door2].addEdge(GraphEdge(self.graphNodes[door2], self.graphNodes[door1], list(reversed(path))))
@@ -427,7 +437,8 @@ class Agent:
         
 
 if __name__ == "__main__":
-    agent = Agent("NetHackScore-v0", closestToAgent)
+    agent = Agent("NetHackScore-v0", closestToAgent, seed=int(argv[1]) if len(argv) > 1 else None)
 
     # Let's try and play
     print(f"Result: {agent.play()}")
+    print(f"Seed: {agent.seed}")

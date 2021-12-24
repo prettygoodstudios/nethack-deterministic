@@ -104,10 +104,12 @@ class GraphNode():
                     #    rect = patches.Rectangle((x,y), 1,1, facecolor='r')
                     #    axes.add_patch(rect) 
 
+        scatterPoints = [[], []]
         # Traverse and draw the nodes and edges
         def traverse(node: GraphNode):
-            nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges,node.getEdges()))
-            plt.scatter([node.x + 0.5], [node.y + 0.5])
+            nonTraversedEdges = list(filter(lambda x: not str(x) in traversedEdges, node.getEdges()))
+            scatterPoints[0] += [node.x + 0.5]
+            scatterPoints[1] += [node.y + 0.5]
             plt.annotate(f"({node.x},{node.y})", (node.x, node.y))
             if len(nonTraversedEdges) == 0:
                 return
@@ -120,6 +122,7 @@ class GraphNode():
                 plt.plot(xPts, yPts)
                 traverse(edge.getTo())
         traverse(self)
+        plt.scatter(scatterPoints[0], scatterPoints[1])
         plt.axis('scaled')
         plt.gca().invert_yaxis()
         plt.show()

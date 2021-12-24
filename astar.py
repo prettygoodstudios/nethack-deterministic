@@ -62,6 +62,61 @@ class PathFindingMap(ABC):
     def getEnviromentDimensions(self) -> tuple:
         """Returns dimensions of enviroment"""
 
+def floodSearchInGridWorld(map: Map, start: tuple, ignoreDoors=True) -> dict:
+    """Flood search algorithm for nle grid world"""
+    actionDirection = {
+        MoveActions.UP: (0, -1),
+        MoveActions.DOWN: (0, 1),
+        MoveActions.LEFT: (-1, 0),
+        MoveActions.RIGHT: (1, 0),
+        MoveActions.UP_RIGHT: (1, -1),
+        MoveActions.DOWN_LEFT: (-1, 1),
+        MoveActions.DOWN_RIGHT: (1, 1),
+        MoveActions.UP_LEFT: (-1, -1)
+    }
+    openSet = {start: Node(start, start, 0, None)}
+    openQueue = [openSet[k] for k in openSet]
+    closedSet = {}
+    height, width = map.getEnviromentDimensions()
+    while len(openSet) > 0:
+        current = heappop(openQueue)
+        openSet.pop(current.getPosition())
+        currX, currY = current.getPosition()
+        closedSet[current.getPosition()] = current
+        # Ensure in bounds
+        for action in MoveActions:
+            newX, newY = actionDirection[action][0] + currX, actionDirection[action][1] + currY
+            diagonal = (newX != currX and newY != currY)
+            # Check if legal move
+            if not (newX, newY) in closedSet and not (map.isDoor(currY, currX) and diagonal) and not (map.isDoor(newY, newX) and diagonal):
+                inBounds = newY < height and newX < width and newX >= 0 and newY >= 0
+                isNotWall = map.isNotWall(newY, newX, diagonal=diagonal)
+                if inBounds and isNotWall and ( ignoreDoors or not map.isDoor(newY, newX) ):
+                    if (newX, newY) in openSet:
+                        openSet[(newX, newY)].updateCost(current.getCost() + 1, current)
+                    else:
+                        openSet[(newX, newY)] = Node((newX, newY), (newX, newY), current.getCost() +1, current)
+                        heappush(openQueue, openSet[(newX, newY)])
+                elif map.isDoor(newY, newX):
+                    if not (newX, newY) in closedSet:
+                        closedSet[newX, newY] = Node((newX, newY), (newX, newY), current.getCost() +1, current)
+                    else:
+                        closedSet[newX, newY].updateCost(current.getCost() + 1, current)
+    return closedSet
+
+def findPathUsingFloodSearch(closedSet: dict, goal: tuple) -> list:
+    """Uses the closed to find path if exists"""
+    if not goal in closedSet:
+        # If the goal is not in the closed set then no path exists
+        return None
+    path = []
+    current = closedSet[goal]
+    while not current is None:
+        path.append(tuple(reversed(current.getPosition())))
+        current = current.getParent()
+    return list(reversed(path))
+
+
 
 def findPathInGridWorld(map: Map, start: tuple, goal: tuple, ignoreDoors=True):
     """A* algorithm for nle grid world"""
