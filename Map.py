@@ -64,6 +64,16 @@ class Map:
             isNew = isNew or self.map[y+1][x-1] == 32 or self.isWall(y+1, x-1)
         return isNew and not self.isWall(y,x)
 
+    def findDoors(self):
+        y_bound = self.getEnviromentDimensions()[0]
+        x_bound = self.getEnviromentDimensions()[1]
+        points = []
+        for y in range(y_bound):
+            for x in range(x_bound):
+                if(self.isDoor(y, x)):
+                    points.append((y, x))
+        return points
+
     def identifySearchPoints(self):
         y_bound = self.getEnviromentDimensions()[0]
         x_bound = self.getEnviromentDimensions()[1]

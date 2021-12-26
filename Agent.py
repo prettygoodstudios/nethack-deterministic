@@ -85,7 +85,8 @@ class Agent:
 
     def __breakGlass(self):
         """Emergency algo"""
-        sorter = lambda x: (self.y_pos - x[0]) ** 2 + (self.x_pos - x[1]) ** 2
+        doorSet = set(self.map.findDoors())
+        sorter = lambda x: -1 if x in doorSet else (self.y_pos - x[0]) ** 2 + (self.x_pos - x[1]) ** 2
         queue = sorted(self.map.identifySearchPoints(), key=sorter)
         while len(queue) > 0:
             if self.map.isDead():
@@ -257,12 +258,13 @@ class Agent:
             self.map.update(obs)
             blstats = [_ for _ in obs["blstats"]]
             self.score = blstats[9]
-            self.moves = blstats[20]
+            if blstats[20] != 0:
+                self.moves = blstats[20]
             self.x_pos, self.y_pos = blstats[0], blstats[1]
             self.visited.add((self.y_pos, self.x_pos))
 
     def render(self):
-        self.env.render()
+        print(self.env.render(mode="ansi"))
 
     def buildGraph(self):
         """Builds initial graph"""
