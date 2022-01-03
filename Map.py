@@ -7,6 +7,7 @@ class Map:
     env = None
     obs = None
     doors = set()
+    walls = set()
 
     def __init__(self, env, obs):
         self.env = env
@@ -96,8 +97,12 @@ class Map:
             return False
         return True
 
+    def isComestible(self, y, x):
+        """Determines whether comestible"""
+        return self.map[y][x] == 37
+
     def isDoor(self, y, x):
-        if self.checkIfInBounds(y,x):
+        if self.checkIfInBounds(y,x) and self.isNotWall(y,x):
             if (y,x) in self.doors:
                 return True
             if(self.map[y][x] == 124 or self.map[y][x] == 45):
@@ -109,8 +114,8 @@ class Map:
                 if(self.map[y][x] != 124 or self.map[y][x] != 45):
                     if((self.map[y-1][x] == 124 or self.map[y-1][x] == 45) and (self.map[y+1][x] == 124 or self.map[y+1][x] == 45) and (self.map[y][x-1] == 32 or self.map[y][x+1] == 32) and self.isNotWall(y, x)):
                         return True
-                    elif((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and (self.map[y-1][x] == 32 or self.map[y+1][x] == 32) and self.isNotWall(y, x)):
-                        return True
+                elif((self.map[y][x-1] == 124 or self.map[y][x-1] == 45) and (self.map[y][x+1] == 124 or self.map[y][x+1] == 45) and self.isNotWall(y, x)):
+                    return True
         return False
 
     def isPet(self, y, x):
@@ -129,6 +134,8 @@ class Map:
         return self.colors[y][x] == 6 and self.map[y][x] == 35
 
     def isNotWall(self, y, x, diagonal=False): #Treats boulders as walls
+        if (y,x) in self.walls:
+            return False
         if not self.checkIfInBounds(y,x):
             return False
         if (self.isIronBars(y, x)):
